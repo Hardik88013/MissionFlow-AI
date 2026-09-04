@@ -18,34 +18,34 @@ export function LiveMissionNetworkPreview() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Left Sidebar Navigation */}
-          <div className="lg:col-span-2 flex flex-col gap-2">
-            <button className="flex items-center gap-3 w-full bg-primary/10 text-primary dark:text-[#69E0A5] font-semibold px-4 py-3 rounded-lg shadow-sm border border-primary/20">
+          <div className="lg:col-span-2 flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <button className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap bg-primary/10 text-primary dark:text-[#69E0A5] font-semibold px-4 py-3 rounded-lg shadow-sm border border-primary/20">
               <MapIcon className="w-5 h-5 text-primary dark:text-[#69E0A5]" />
               <span className="text-sm">Live Map</span>
             </button>
-            <button className="flex items-center gap-3 w-full hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <Truck className="w-5 h-5" />
               <span className="text-sm">Convoys</span>
             </button>
-            <button className="flex items-center gap-3 w-full hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <Box className="w-5 h-5" />
               <span className="text-sm">Supplies</span>
             </button>
-            <button className="flex items-center justify-between w-full hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button className="flex items-center justify-between w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5" />
                 <span className="text-sm">Alerts</span>
               </div>
               <span className="bg-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
             </button>
-            <button className="flex items-center gap-3 w-full hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <BarChart3 className="w-5 h-5" />
               <span className="text-sm">Analytics</span>
             </button>
           </div>
 
           {/* Center Map Area */}
-          <div className="lg:col-span-6 relative bg-surface-elevated rounded-2xl overflow-hidden border border-border/50 shadow-inner min-h-[400px]">
+          <div className="lg:col-span-6 relative bg-surface-elevated rounded-2xl overflow-hidden border border-border/50 shadow-inner min-h-[300px] md:min-h-[400px]">
             {/* Map Placeholder Image */}
             <div 
               className="absolute inset-0 bg-cover bg-center opacity-40 dark:opacity-20 mix-blend-luminosity"
@@ -55,13 +55,13 @@ export function LiveMissionNetworkPreview() {
             {/* Overlay Map UI */}
             <div className="absolute inset-0 p-4">
               {/* Map Controls */}
-              <div className="absolute bottom-6 left-6 flex flex-col bg-surface rounded-lg shadow-md border border-border/40">
+              <div className="hidden md:flex absolute bottom-6 left-6 flex-col bg-surface rounded-lg shadow-md border border-border/40">
                 <button className="p-2 border-b border-border/40 hover:bg-surface-elevated text-foreground font-bold">+</button>
                 <button className="p-2 hover:bg-surface-elevated text-foreground font-bold">-</button>
               </div>
 
               {/* Status Legend */}
-              <div className="absolute bottom-6 right-6 flex items-center gap-4 bg-surface/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              <div className="hidden sm:flex absolute bottom-6 right-6 items-center gap-4 bg-surface/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#00A859]"/> On Route</div>
                 <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#F5A623]"/> Delayed</div>
                 <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-slate-800"/> At Base</div>
@@ -69,7 +69,7 @@ export function LiveMissionNetworkPreview() {
               </div>
 
               {/* TRK-02 Float Card */}
-              <div className="absolute top-1/4 right-1/4 bg-surface p-3 rounded-xl shadow-lg border border-border/50 text-xs w-40 z-10">
+              <div className="hidden md:block absolute top-1/4 right-1/4 bg-surface p-3 rounded-xl shadow-lg border border-border/50 text-xs w-40 z-10">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-1.5 h-1.5 bg-[#00A859] rounded-full animate-pulse" />
                   <span className="font-bold">Convoy TRK-02</span>
@@ -173,6 +173,7 @@ export function LiveMissionNetworkPreview() {
     </section>
   );
 }
+
 
 
 
