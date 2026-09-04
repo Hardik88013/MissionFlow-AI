@@ -12,13 +12,13 @@ export function Hero() {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1549887552-cb1cb71ae0f1—q=80&w=2070&auto=format&fit=crop')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1549887552-cb1cb71ae0f1?q=80&w=2070&auto=format&fit=crop')",
             maskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)"
           }}
         />
         {/* Subtle overlay to ensure text readability if it bleeds */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent w-full md:w-3/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background opacity-90 to-transparent w-full md:w-3/5" />
       </div>
 
       {/* Floating Elements (Top Right) */}
@@ -87,7 +87,7 @@ export function Hero() {
       </Container>
 
       {/* Metrics Bar */}
-      <div className="relative z-20 w-full mt-auto bg-background/90 backdrop-blur-md border-t border-border/40 py-6">
+      <div className="relative z-20 w-full mt-auto bg-background backdrop-blur-md border-t border-border/40 py-6">
         <Container>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 divide-x divide-transparent md:divide-border/30">
             {/* Metric 1 */}
@@ -139,5 +139,8 @@ export function Hero() {
     </section>
   );
 }
+
+
+
 
 
