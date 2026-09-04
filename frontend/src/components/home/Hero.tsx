@@ -1,10 +1,10 @@
-import { Container } from "../ui/Container";
+﻿import { Container } from "../ui/Container";
 import { Button } from "../ui/Button";
 import { ArrowRight, PlayCircle, Clock, Layers, Zap, Shield } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative w-full min-h-[90vh] pt-20 flex flex-col bg-white overflow-hidden">
+    <section className="relative w-full min-h-[90vh] pt-20 flex flex-col bg-background overflow-hidden">
       
       {/* Background Image with Fade */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
@@ -12,13 +12,13 @@ export function Hero() {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1549887552-cb1cb71ae0f1?q=80&w=2070&auto=format&fit=crop')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1549887552-cb1cb71ae0f1—q=80&w=2070&auto=format&fit=crop')",
             maskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)"
           }}
         />
         {/* Subtle overlay to ensure text readability if it bleeds */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent w-full md:w-3/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent w-full md:w-3/5" />
       </div>
 
       {/* Floating Elements (Top Right) */}
@@ -33,7 +33,7 @@ export function Hero() {
               {/* Simple Indian Flag representation */}
               <div className="w-12 h-8 flex flex-col shadow-sm mb-4 border border-black/10">
                 <div className="w-full h-1/3 bg-[#FF671F]" />
-                <div className="w-full h-1/3 bg-white flex justify-center items-center">
+                <div className="w-full h-1/3 bg-background flex justify-center items-center">
                   <div className="w-2 h-2 rounded-full border border-[#06038D]" />
                 </div>
                 <div className="w-full h-1/3 bg-[#046A38]" />
@@ -79,7 +79,7 @@ export function Hero() {
             <Button className="w-full sm:w-auto bg-[#00A859] hover:bg-[#008f4c] text-white shadow-lg shadow-green-500/20 rounded-md font-bold px-8 h-12 text-base">
               Request Demo <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button variant="outline" className="w-full sm:w-auto bg-white hover:bg-surface-elevated text-foreground border-border/60 rounded-md font-bold px-6 h-12 text-base shadow-sm">
+            <Button variant="outline" className="w-full sm:w-auto bg-background hover:bg-surface-elevated text-foreground border-border/60 rounded-md font-bold px-6 h-12 text-base shadow-sm">
               <PlayCircle className="w-5 h-5 mr-2" /> Watch Video
             </Button>
           </div>
@@ -87,12 +87,12 @@ export function Hero() {
       </Container>
 
       {/* Metrics Bar */}
-      <div className="relative z-20 w-full mt-auto bg-white/90 backdrop-blur-md border-t border-border/40 py-6">
+      <div className="relative z-20 w-full mt-auto bg-background/90 backdrop-blur-md border-t border-border/40 py-6">
         <Container>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 divide-x divide-transparent md:divide-border/30">
             {/* Metric 1 */}
             <div className="flex items-center gap-4 px-2">
-              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Clock className="w-5 h-5 text-[#00A859]" />
               </div>
               <div>
@@ -103,7 +103,7 @@ export function Hero() {
             
             {/* Metric 2 */}
             <div className="flex items-center gap-4 px-2 md:px-6">
-              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Layers className="w-5 h-5 text-[#00A859]" />
               </div>
               <div>
@@ -114,7 +114,7 @@ export function Hero() {
 
             {/* Metric 3 */}
             <div className="flex items-center gap-4 px-2 md:px-6">
-              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Zap className="w-5 h-5 text-[#00A859]" />
               </div>
               <div>
@@ -125,7 +125,7 @@ export function Hero() {
 
             {/* Metric 4 */}
             <div className="flex items-center gap-4 px-2 md:px-6">
-              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Shield className="w-5 h-5 text-[#00A859]" />
               </div>
               <div>
@@ -139,3 +139,5 @@ export function Hero() {
     </section>
   );
 }
+
+

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Container } from "../ui/Container";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
 import { Menu, X, Search, ArrowRight } from "lucide-react";
+import { ThemeToggle } from "../ui/ThemeToggle";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,7 +28,7 @@ export function Navbar() {
   return (
     <header 
       className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-border/40" : "bg-white border-b border-transparent"
+        scrolled ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border/40" : "bg-background border-b border-transparent"
       }`}
     >
       <Container>
@@ -60,6 +61,7 @@ export function Navbar() {
             <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Search">
               <Search className="w-5 h-5" />
             </button>
+            <ThemeToggle />
             <a href="#signin" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Sign In
             </a>
@@ -70,6 +72,7 @@ export function Navbar() {
 
           {/* MOBILE: Actions */}
           <div className="flex items-center gap-2 lg:hidden">
+            <ThemeToggle />
             <IconButton
               variant="ghost"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -83,7 +86,7 @@ export function Navbar() {
 
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border/40 bg-white px-4 py-4 space-y-4 shadow-xl">
+        <div className="lg:hidden border-t border-border/40 bg-background px-4 py-4 space-y-4 shadow-xl">
           <nav className="flex flex-col gap-4">
             {links.map((link) => (
               <a
@@ -99,6 +102,7 @@ export function Navbar() {
             ))}
           </nav>
           <div className="pt-4 border-t border-border/40 flex flex-col gap-3">
+            <ThemeToggle />
             <a href="#signin" className="text-base font-medium text-foreground text-center py-2">
               Sign In
             </a>
@@ -111,3 +115,5 @@ export function Navbar() {
     </header>
   );
 }
+
+
