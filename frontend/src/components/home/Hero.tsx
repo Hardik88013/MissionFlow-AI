@@ -10,9 +10,8 @@ export function Hero() {
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         {/* We use an arbitrary mountain road placeholder to mimic the mockup */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1549887552-cb1cb71ae0f1?q=80&w=2070&auto=format&fit=crop')",
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-[url('/hero-light.jpg')] dark:bg-[url('/hero-dark.jpg')]"
+          style={{
             maskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)"
           }}
@@ -139,6 +138,8 @@ export function Hero() {
     </section>
   );
 }
+
+
 
 
 
