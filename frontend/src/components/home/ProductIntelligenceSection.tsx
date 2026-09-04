@@ -1,40 +1,76 @@
-
+import { useState } from "react";
 import { Container } from "../ui/Container";
 import { SectionHeading } from "../ui/SectionHeading";
+import { PRODUCT_TABS } from "./product/types";
+import type { ProductTab } from "./product/types";
+import { OverviewView } from "./product/OverviewView";
+import { FleetIntelligenceView } from "./product/FleetIntelligenceView";
+import { RouteOptimizationView } from "./product/RouteOptimizationView";
+import { InventoryView } from "./product/InventoryView";
+import { RealTimeOperationsView } from "./product/RealTimeOperationsView";
 
 export function ProductIntelligenceSection() {
-  const tabs = ["Overview", "Fleet Intelligence", "Route Optimization", "Inventory", "Real-Time Operations"];
+  const [activeTab, setActiveTab] = useState<ProductTab>("OVERVIEW");
+
+  const renderActiveView = () => {
+    switch (activeTab) {
+      case "OVERVIEW": return <OverviewView />;
+      case "FLEET_INTELLIGENCE": return <FleetIntelligenceView />;
+      case "ROUTE_OPTIMIZATION": return <RouteOptimizationView />;
+      case "INVENTORY": return <InventoryView />;
+      case "REAL_TIME_OPERATIONS": return <RealTimeOperationsView />;
+      default: return <OverviewView />;
+    }
+  };
 
   return (
-    <section className="py-24 bg-background">
-      <Container>
-        <div className="mb-12">
+    <section className="py-24 bg-surface relative overflow-hidden">
+      <Container className="relative z-10">
+        <div className="mb-12 md:text-center flex flex-col md:items-center max-w-3xl mx-auto">
           <p className="text-label text-primary mb-3">PRODUCT INTELLIGENCE</p>
           <SectionHeading 
             title="Intelligence at Every Mile." 
-            subtitle="Complete visibility and control across your entire operational footprint."
+            subtitle="MissionFlow AI connects fleet health, routes, inventory, and live operations into one intelligent operational view."
+            centered
           />
         </div>
 
-        {/* Placeholder Tabs */}
-        <div className="flex overflow-x-auto pb-4 gap-2 mb-8 hide-scrollbar">
-          {tabs.map((tab, i) => (
-            <button 
-              key={tab} 
-              className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                i === 0 ? "bg-primary text-primary-foreground" : "bg-surface-elevated text-muted-foreground hover:text-foreground hover:bg-surface-elevated/80"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        {/* Product UI Container */}
+        <div className="flex flex-col xl:flex-row gap-8 bg-background border border-border/50 rounded-2xl p-4 sm:p-6 shadow-xl">
+          
+          {/* Left: Tab Navigation */}
+          <div 
+            role="tablist" 
+            aria-label="Product features"
+            className="flex xl:flex-col overflow-x-auto xl:overflow-x-visible pb-2 xl:pb-0 gap-2 xl:w-64 shrink-0 hide-scrollbar"
+          >
+            {PRODUCT_TABS.map(tab => (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`whitespace-nowrap xl:whitespace-normal text-left px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                  activeTab === tab.id 
+                    ? "bg-primary text-primary-foreground shadow-md" 
+                    : "bg-surface text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Feature Visual Placeholder */}
-        <div className="aspect-[16/9] lg:aspect-[21/9] w-full rounded-2xl bg-surface border border-border/50 flex flex-col items-center justify-center p-8 text-center shadow-sm">
-          <p className="text-muted-foreground max-w-md">
-            [ Product Intelligence Dashboard Placeholder ]
-          </p>
+          {/* Right: Active View Panel */}
+          <div 
+            role="tabpanel"
+            className="flex-1 bg-surface-elevated/30 rounded-xl border border-border/40 min-h-[400px] overflow-hidden relative"
+          >
+            {/* Subtle background mesh */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05)_0%,transparent_100%)] pointer-events-none" />
+            
+            {renderActiveView()}
+          </div>
         </div>
       </Container>
     </section>
