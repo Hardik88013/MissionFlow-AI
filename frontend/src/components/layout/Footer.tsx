@@ -1,4 +1,3 @@
-
 import { Container } from "../ui/Container";
 
 export function Footer() {
@@ -57,7 +56,7 @@ export function Footer() {
           {/* Links */}
           {footerLinks.map((group) => (
             <div key={group.title}>
-              <h4 className="font-semibold text-foreground mb-4">{group.title}</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">{group.title}</h4>
               <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
@@ -75,7 +74,7 @@ export function Footer() {
         </div>
         
         <div className="mt-16 border-t border-border/40 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} MissionFlow AI. All rights reserved.</p>
+          <p>© 2026 MissionFlow AI. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
