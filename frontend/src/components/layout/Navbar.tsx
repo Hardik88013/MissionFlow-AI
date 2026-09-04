@@ -20,11 +20,8 @@ export function Navbar() {
       <Container>
         <div className="flex h-16 items-center justify-between">
           {/* LEFT: Logo */}
-          <div className="flex items-center gap-3">
-            <img src="/favicon.svg" alt="MissionFlow AI Logo" className="h-8 w-8" />
-            <div className="font-bold text-xl tracking-tighter text-primary">
-              MissionFlow AI
-            </div>
+          <div className="flex items-center">
+            <img src="/logo.png" alt="MissionFlow AI Logo" className="h-10 md:h-12 w-auto" />
           </div>
 
           {/* CENTER: Desktop Navigation */}
@@ -85,3 +82,4 @@ export function Navbar() {
     </header>
   );
 }
+

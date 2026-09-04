@@ -1,4 +1,4 @@
-import { Container } from "../ui/Container";
+﻿import { Container } from "../ui/Container";
 
 export function Footer() {
   const footerLinks = [
@@ -42,11 +42,8 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           {/* Branding & Description */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <img src="/favicon.svg" alt="MissionFlow AI Logo" className="h-8 w-8" />
-              <div className="font-bold text-xl tracking-tighter text-primary">
-                MissionFlow AI
-              </div>
+            <div className="flex items-center mb-6">
+              <img src="/logo.png" alt="MissionFlow AI Logo" className="h-10 md:h-12 w-auto" />
             </div>
             <p className="text-body-small max-w-sm">
               AI-powered logistics intelligence for mission-critical operations.
@@ -74,7 +71,7 @@ export function Footer() {
         </div>
         
         <div className="mt-16 border-t border-border/40 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© 2026 MissionFlow AI. All rights reserved.</p>
+          <p>Â© 2026 MissionFlow AI. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
@@ -84,3 +81,5 @@ export function Footer() {
     </footer>
   );
 }
+
+
