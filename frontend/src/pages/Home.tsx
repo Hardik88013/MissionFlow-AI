@@ -1,7 +1,7 @@
 
 import { Layout } from "../components/layout/Layout";
 import { Hero } from "../components/home/Hero";
-import { MetricsSection } from "../components/home/MetricsSection";
+
 import { LiveMissionNetworkPreview } from "../components/home/LiveMissionNetworkPreview";
 import { IndustriesSection } from "../components/home/IndustriesSection";
 import { ProductIntelligenceSection } from "../components/home/ProductIntelligenceSection";
@@ -13,7 +13,6 @@ export function Home() {
   return (
     <Layout>
       <Hero />
-      <MetricsSection />
       <LiveMissionNetworkPreview />
       <IndustriesSection />
       <ProductIntelligenceSection />
@@ -23,3 +22,6 @@ export function Home() {
     </Layout>
   );
 }
+
+
+
