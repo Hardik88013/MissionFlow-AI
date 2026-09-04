@@ -10,13 +10,10 @@ export function Hero() {
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         {/* We use an arbitrary mountain road placeholder to mimic the mockup */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-[url('/hero-light.jpg')] dark:bg-[url('/hero-dark.jpg')]"
-          style={{
-            maskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)",
-            WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)"
-          }}
-        />
-        {/* Subtle overlay to ensure text readability if it bleeds */}
+          className="absolute inset-0 w-full h-full">
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-[url('/hero-light.jpg')] dark:hidden" style={{ maskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)" }} />
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-[url('/hero-dark.jpg')] hidden dark:block" style={{ maskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 35%, black 65%, black 100%)" }} />
+        </div>`n        {/* Subtle overlay to ensure text readability if it bleeds */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background opacity-90 to-transparent w-full md:w-3/5" />
       </div>
 
@@ -32,7 +29,7 @@ export function Hero() {
               {/* Simple Indian Flag representation */}
               <div className="w-12 h-8 flex flex-col shadow-sm mb-4 border border-black/10">
                 <div className="w-full h-1/3 bg-[#FF671F]" />
-                <div className="w-full h-1/3 bg-background flex justify-center items-center">
+                <div className="w-full h-1/3 bg-white flex justify-center items-center">
                   <div className="w-2 h-2 rounded-full border border-[#06038D]" />
                 </div>
                 <div className="w-full h-1/3 bg-[#046A38]" />
@@ -138,6 +135,8 @@ export function Hero() {
     </section>
   );
 }
+
+
 
 
 
