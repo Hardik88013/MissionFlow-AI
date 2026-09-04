@@ -144,3 +144,21 @@
     @apply bg-surface/80 dark:bg-surface/50 backdrop-blur-md border border-border shadow-soft dark:shadow-glass-dark;
   }
 }
+@layer utilities {
+  @keyframes draw-route {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes move-vehicle {
+    0% {
+      transform: translate(25%, 20%);
+    }
+    50% {
+      transform: translate(50%, 10%); /* Following the quadratic bezier curve approximately */
+    }
+    100% {
+      transform: translate(75%, 30%);
+    }
+  }
+}
