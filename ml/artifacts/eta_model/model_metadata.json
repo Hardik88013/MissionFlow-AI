@@ -1,0 +1,36 @@
+{
+    "model_type": "GradientBoostingRegressor",
+    "target": "trip_duration_minutes",
+    "mae_minutes": 3.5436725884590583,
+    "rmse_minutes": 7.324108818514403,
+    "r2": 0.25978041551647646,
+    "training_rows": 22908,
+    "testing_rows": 5728,
+    "features": [
+        "straight_line_distance_km",
+        "start_longitude",
+        "start_latitude",
+        "end_longitude",
+        "end_latitude",
+        "hour",
+        "day_of_week",
+        "is_weekend",
+        "CALL_TYPE",
+        "ORIGIN_STAND"
+    ],
+    "numeric_features": [
+        "straight_line_distance_km",
+        "start_longitude",
+        "start_latitude",
+        "end_longitude",
+        "end_latitude",
+        "hour",
+        "day_of_week",
+        "is_weekend"
+    ],
+    "categorical_features": [
+        "CALL_TYPE",
+        "ORIGIN_STAND"
+    ],
+    "dataset": "UCI Porto Taxi Trajectory Dataset"
+}
