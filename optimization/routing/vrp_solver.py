@@ -3,7 +3,7 @@ MissionFlow AI
 Vehicle Routing Problem Solver
 
 Uses Google OR-Tools to optimize multi-vehicle delivery routes
-with vehicle capacity constraints.
+with vehicle capacity and delivery time-window constraints.
 """
 
 from dataclasses import dataclass
@@ -14,6 +14,9 @@ from ortools.constraint_solver import routing_enums_pb2
 
 from optimization.routing.capacity_constraints import (
     validate_capacities,
+)
+from optimization.routing.time_windows import (
+    validate_time_windows,
 )
 
 
@@ -40,9 +43,13 @@ def solve_vrp(
     depot: int = 0,
     vehicle_capacities: Sequence[int] | None = None,
     demands: Sequence[int] | None = None,
+    time_windows: Sequence[tuple[int, int]] | None = None,
+    travel_speed_kmh: float = 40.0,
+    service_time_minutes: int = 10,
 ) -> VRPSolution:
     """
-    Solve a multi-vehicle capacitated routing problem.
+    Solve a multi-vehicle capacitated routing problem
+    with optional delivery time windows.
 
     Parameters
     ----------
@@ -62,6 +69,18 @@ def solve_vrp(
         Delivery demand at each location.
         Depot demand should normally be 0.
 
+    time_windows:
+        Delivery time windows in minutes from midnight.
+        Example:
+            (540, 660) -> 09:00 to 11:00
+
+    travel_speed_kmh:
+        Average vehicle travel speed used to convert distance
+        into travel time.
+
+    service_time_minutes:
+        Time spent servicing each delivery location.
+
     Returns
     -------
     VRPSolution
@@ -70,7 +89,7 @@ def solve_vrp(
     Raises
     ------
     ValueError
-        If the routing inputs are invalid.
+        If routing inputs are invalid.
     """
 
     if not distance_matrix:
@@ -87,7 +106,16 @@ def solve_vrp(
     if not 0 <= depot < location_count:
         raise ValueError("Depot index is outside the distance matrix.")
 
-    # Capacity constraints are optional for backward compatibility.
+    if travel_speed_kmh <= 0:
+        raise ValueError("travel_speed_kmh must be greater than 0.")
+
+    if service_time_minutes < 0:
+        raise ValueError("service_time_minutes cannot be negative.")
+
+    # ---------------------------------------------------------
+    # Validate capacity constraints
+    # ---------------------------------------------------------
+
     if vehicle_capacities is not None or demands is not None:
 
         if vehicle_capacities is None:
@@ -115,6 +143,23 @@ def solve_vrp(
             demands,
         )
 
+    # ---------------------------------------------------------
+    # Validate time windows
+    # ---------------------------------------------------------
+
+    if time_windows is not None:
+
+        if len(time_windows) != location_count:
+            raise ValueError(
+                "Number of time windows must match the number of locations."
+            )
+
+        validate_time_windows(time_windows)
+
+    # ---------------------------------------------------------
+    # Create OR-Tools routing model
+    # ---------------------------------------------------------
+
     manager = pywrapcp.RoutingIndexManager(
         location_count,
         vehicle_count,
@@ -122,6 +167,10 @@ def solve_vrp(
     )
 
     routing = pywrapcp.RoutingModel(manager)
+
+    # ---------------------------------------------------------
+    # Distance callback
+    # ---------------------------------------------------------
 
     def distance_callback(from_index: int, to_index: int) -> int:
         """Return travel distance between two routing nodes."""
@@ -165,6 +214,90 @@ def solve_vrp(
         )
 
     # ---------------------------------------------------------
+    # Time window constraint
+    # ---------------------------------------------------------
+
+    if time_windows is not None:
+
+        def travel_time_callback(
+            from_index: int,
+            to_index: int,
+        ) -> int:
+            """
+            Return travel time in minutes.
+
+            Distance is converted from meters to minutes
+            using the configured average vehicle speed.
+            """
+
+            from_node = manager.IndexToNode(from_index)
+            to_node = manager.IndexToNode(to_index)
+
+            distance_meters = distance_matrix[from_node][to_node]
+
+            distance_km = distance_meters / 1000.0
+
+            travel_time_hours = (
+                distance_km / travel_speed_kmh
+            )
+
+            travel_time_minutes = (
+                travel_time_hours * 60
+            )
+
+            return max(1, int(round(travel_time_minutes)))
+
+        time_callback_index = routing.RegisterTransitCallback(
+            travel_time_callback
+        )
+
+        routing.AddDimension(
+            time_callback_index,
+            1440,
+            1440,
+            False,
+            "Time",
+        )
+
+        time_dimension = routing.GetDimensionOrDie("Time")
+
+        # Apply delivery time windows.
+        for location_index, (
+            earliest_time,
+            latest_time,
+        ) in enumerate(time_windows):
+
+            index = manager.NodeToIndex(location_index)
+
+            time_dimension.CumulVar(index).SetRange(
+                earliest_time,
+                latest_time,
+            )
+
+        # Add service time to every non-depot location.
+        for location_index in range(location_count):
+
+            if location_index == depot:
+                continue
+
+            index = manager.NodeToIndex(location_index)
+
+            time_dimension.SlackVar(index).SetValue(
+                service_time_minutes
+            )
+
+        # Vehicles start from the depot at the beginning
+        # of the operating day.
+        for vehicle_id in range(vehicle_count):
+
+            start_index = routing.Start(vehicle_id)
+
+            time_dimension.CumulVar(start_index).SetRange(
+                0,
+                1440,
+            )
+
+    # ---------------------------------------------------------
     # Search configuration
     # ---------------------------------------------------------
 
@@ -179,6 +312,10 @@ def solve_vrp(
     )
 
     search_parameters.time_limit.seconds = 5
+
+    # ---------------------------------------------------------
+    # Solve
+    # ---------------------------------------------------------
 
     solution = routing.SolveWithParameters(
         search_parameters
