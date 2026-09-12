@@ -2,14 +2,19 @@
 MissionFlow AI
 Vehicle Routing Problem Solver
 
-Uses Google OR-Tools to optimize multi-vehicle delivery routes.
+Uses Google OR-Tools to optimize multi-vehicle delivery routes
+with vehicle capacity constraints.
 """
 
 from dataclasses import dataclass
-from typing import List, Sequence, Tuple
+from typing import List, Sequence
 
 from ortools.constraint_solver import pywrapcp
 from ortools.constraint_solver import routing_enums_pb2
+
+from optimization.routing.capacity_constraints import (
+    validate_capacities,
+)
 
 
 @dataclass
@@ -33,9 +38,11 @@ def solve_vrp(
     distance_matrix: Sequence[Sequence[int]],
     vehicle_count: int,
     depot: int = 0,
+    vehicle_capacities: Sequence[int] | None = None,
+    demands: Sequence[int] | None = None,
 ) -> VRPSolution:
     """
-    Solve a capacitated-free multi-vehicle routing problem.
+    Solve a multi-vehicle capacitated routing problem.
 
     Parameters
     ----------
@@ -48,6 +55,13 @@ def solve_vrp(
     depot:
         Index of the depot/start location.
 
+    vehicle_capacities:
+        Maximum load capacity of each vehicle.
+
+    demands:
+        Delivery demand at each location.
+        Depot demand should normally be 0.
+
     Returns
     -------
     VRPSolution
@@ -56,7 +70,7 @@ def solve_vrp(
     Raises
     ------
     ValueError
-        If the input matrix or vehicle count is invalid.
+        If the routing inputs are invalid.
     """
 
     if not distance_matrix:
@@ -72,6 +86,34 @@ def solve_vrp(
 
     if not 0 <= depot < location_count:
         raise ValueError("Depot index is outside the distance matrix.")
+
+    # Capacity constraints are optional for backward compatibility.
+    if vehicle_capacities is not None or demands is not None:
+
+        if vehicle_capacities is None:
+            raise ValueError(
+                "vehicle_capacities must be provided when demands are provided."
+            )
+
+        if demands is None:
+            raise ValueError(
+                "demands must be provided when vehicle capacities are provided."
+            )
+
+        if len(vehicle_capacities) != vehicle_count:
+            raise ValueError(
+                "Number of vehicle capacities must match vehicle_count."
+            )
+
+        if len(demands) != location_count:
+            raise ValueError(
+                "Number of demands must match the number of locations."
+            )
+
+        validate_capacities(
+            vehicle_capacities,
+            demands,
+        )
 
     manager = pywrapcp.RoutingIndexManager(
         location_count,
@@ -97,6 +139,35 @@ def solve_vrp(
         transit_callback_index
     )
 
+    # ---------------------------------------------------------
+    # Vehicle capacity constraint
+    # ---------------------------------------------------------
+
+    if vehicle_capacities is not None and demands is not None:
+
+        def demand_callback(from_index: int) -> int:
+            """Return delivery demand at a routing node."""
+
+            from_node = manager.IndexToNode(from_index)
+
+            return int(demands[from_node])
+
+        demand_callback_index = routing.RegisterUnaryTransitCallback(
+            demand_callback
+        )
+
+        routing.AddDimensionWithVehicleCapacity(
+            demand_callback_index,
+            0,
+            list(vehicle_capacities),
+            True,
+            "Capacity",
+        )
+
+    # ---------------------------------------------------------
+    # Search configuration
+    # ---------------------------------------------------------
+
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
 
     search_parameters.first_solution_strategy = (
@@ -118,20 +189,27 @@ def solve_vrp(
             "OR-Tools could not find a feasible routing solution."
         )
 
+    # ---------------------------------------------------------
+    # Extract routes
+    # ---------------------------------------------------------
+
     routes: List[VehicleRoute] = []
     total_distance = 0
 
     for vehicle_id in range(vehicle_count):
+
         index = routing.Start(vehicle_id)
 
         route: List[int] = []
         route_distance = 0
 
         while not routing.IsEnd(index):
+
             node = manager.IndexToNode(index)
             route.append(node)
 
             previous_index = index
+
             index = solution.Value(
                 routing.NextVar(index)
             )
@@ -145,6 +223,7 @@ def solve_vrp(
         route.append(manager.IndexToNode(index))
 
         if len(route) > 2:
+
             routes.append(
                 VehicleRoute(
                     vehicle_id=vehicle_id,
