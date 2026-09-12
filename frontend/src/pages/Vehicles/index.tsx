@@ -34,14 +34,21 @@ export function VehiclesPage() {
     try {
       const features = {
         vehicle_id: vehicle.vehicle_id,
-        SoC: vehicle.soc || 0.85,
-        Battery_Voltage: vehicle.battery_voltage || 395.2,
-        Battery_Temperature: vehicle.battery_temp || 28.5,
-        Motor_Temperature: vehicle.motor_temp || 55.0,
-        Motor_Vibration: vehicle.motor_vibration || 0.2,
-        Motor_RPM: vehicle.motor_rpm || 1800.0,
-        Tire_Pressure: vehicle.tire_pressure || 33.5,
-        Driving_Speed: vehicle.driving_speed || 55.0
+        mode: "cmapss_benchmark",
+        s2: 641.82 + Math.random() * 2,
+        s3: 1580.0 + Math.random() * 10,
+        s4: 1400.0 + Math.random() * 20,
+        s7: 553.0 + Math.random() * 5,
+        s8: 2388.0 + Math.random() * 2,
+        s9: 9050.0 + Math.random() * 50,
+        s11: 47.0 + Math.random() * 1,
+        s12: 521.0 + Math.random() * 3,
+        s13: 2388.0 + Math.random() * 1,
+        s14: 8130.0 + Math.random() * 20,
+        s15: 8.4 + Math.random() * 0.1,
+        s17: 390.0 + Math.random() * 5,
+        s20: 38.8 + Math.random() * 1,
+        s21: 23.3 + Math.random() * 0.5
       };
       const res = await maintenanceApi.predictMaintenance(features);
       setPrediction(res);
@@ -101,48 +108,70 @@ export function VehiclesPage() {
               disabled={loading}
               className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50"
             >
-              {loading && prediction === null ? "Prediction running..." : "Run AI Health Prediction"}
+              {loading && prediction === null ? "Running AI Temporal Benchmark..." : "Run AI Health Prediction"}
             </button>
           </div>
 
           {/* Prediction Output */}
           <div className="bg-surface p-4 md:p-6 rounded-xl border border-border flex flex-col h-full">
-            <h2 className="text-lg md:text-xl font-bold text-foreground mb-4">AI VEHICLE HEALTH</h2>
+            <h2 className="text-lg md:text-xl font-bold text-foreground mb-2 flex items-center justify-between">
+              AI VEHICLE HEALTH
+              {prediction && (
+                <span className="text-xs font-normal px-2 py-1 bg-yellow-500/20 text-yellow-600 rounded">
+                  Predictive Maintenance Benchmark
+                </span>
+              )}
+            </h2>
             
             {!prediction ? (
               <div className="flex-1 flex items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-lg p-6 md:p-8 text-center text-sm md:text-base">
-                Select a vehicle and run prediction to view AI output from the predictive-maintenance model.
+                Select a vehicle and run prediction to evaluate temporal AI degradation based on C-MAPSS benchmark patterns.
               </div>
             ) : (
-              <div className="space-y-4 md:space-y-6 flex-1 flex flex-col justify-between">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-background border border-border rounded-lg shadow-sm">
-                    <p className="text-sm text-muted-foreground mb-1">Health Score</p>
-                    <p className="text-2xl md:text-3xl font-bold text-foreground">{prediction.health_score.toFixed(1)}%</p>
+              <div className="space-y-4 flex-1 flex flex-col justify-between mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-3 bg-background border border-border rounded-lg shadow-sm">
+                    <p className="text-xs text-muted-foreground mb-1 font-semibold tracking-wider">PREDICTED RUL</p>
+                    <p className="text-xl md:text-2xl font-bold text-foreground">{prediction.predicted_rul.toFixed(1)} <span className="text-sm font-normal">cycles</span></p>
                   </div>
-                  <div className="p-4 bg-background border border-border rounded-lg shadow-sm">
-                    <p className="text-sm text-muted-foreground mb-1">Failure Risk</p>
-                    <p className="text-2xl md:text-3xl font-bold text-foreground">{(prediction.failure_probability * 100).toFixed(1)}%</p>
+                  <div className="p-3 bg-background border border-border rounded-lg shadow-sm">
+                    <p className="text-xs text-muted-foreground mb-1 font-semibold tracking-wider">HEALTH SCORE</p>
+                    <p className="text-xl md:text-2xl font-bold text-foreground">{prediction.health_score.toFixed(1)}%</p>
+                  </div>
+                  <div className="p-3 bg-background border border-border rounded-lg shadow-sm">
+                    <p className="text-xs text-muted-foreground mb-1 font-semibold tracking-wider">FAIL RISK</p>
+                    <p className="text-xl md:text-2xl font-bold text-foreground">{(prediction.failure_probability * 100).toFixed(1)}%</p>
                   </div>
                 </div>
                 
-                <div className={`p-4 md:p-6 border rounded-lg shadow-sm ${
+                <div className={`p-4 border rounded-lg shadow-sm ${
                   prediction.risk_level === 'CRITICAL' ? 'bg-red-500/10 border-red-500' :
-                  prediction.risk_level === 'ATTENTION' || prediction.risk_level === 'HIGH RISK' ? 'bg-yellow-500/10 border-yellow-500' :
+                  prediction.risk_level === 'ATTENTION' || prediction.risk_level === 'MEDIUM RISK' || prediction.risk_level === 'HIGH RISK' ? 'bg-yellow-500/10 border-yellow-500' :
                   'bg-green-500/10 border-green-500'
                 }`}>
-                  <p className="text-xs md:text-sm font-bold opacity-80 mb-1">RISK LEVEL</p>
-                  <p className={`text-xl md:text-2xl font-bold ${
+                  <p className="text-xs font-bold opacity-80 mb-1">RISK LEVEL</p>
+                  <p className={`text-xl font-bold ${
                     prediction.risk_level === 'CRITICAL' ? 'text-red-500' :
-                    prediction.risk_level === 'ATTENTION' || prediction.risk_level === 'HIGH RISK' ? 'text-yellow-500' :
+                    prediction.risk_level === 'ATTENTION' || prediction.risk_level === 'MEDIUM RISK' || prediction.risk_level === 'HIGH RISK' ? 'text-yellow-500' :
                     'text-green-500'
                   }`}>{prediction.risk_level}</p>
                 </div>
                 
-                <div className="pt-4 border-t border-border mt-auto">
-                  <p className="text-xs text-muted-foreground font-bold">Generated by trained predictive-maintenance model</p>
+                {prediction.top_features && prediction.top_features.length > 0 && (
+                  <div className="p-4 bg-background border border-border rounded-lg shadow-sm">
+                     <p className="text-xs font-bold text-foreground mb-2">Why? (Top contributing sensor signals)</p>
+                     <ul className="text-xs text-muted-foreground list-disc list-inside">
+                        {prediction.top_features.map((f: string) => (
+                           <li key={f}>{f.replace('_rmean5', ' (Rolling Mean)')}</li>
+                        ))}
+                     </ul>
+                  </div>
+                )}
+                
+                <div className="pt-3 border-t border-border mt-auto">
+                  <p className="text-xs text-muted-foreground"><strong>Domain Note:</strong> {prediction.domain_note}</p>
                   <p className="text-xs text-muted-foreground mt-1">Model Version: {prediction.model_version}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Timestamp: {new Date().toISOString()}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Timestamp: {new Date(prediction.prediction_timestamp || Date.now()).toLocaleString()}</p>
                 </div>
               </div>
             )}

@@ -102,3 +102,35 @@ The R² is heavily penalized by predictions on engines early in their lifecycle 
 
 ## 29. Future Real-Fleet Data Requirement
 To deploy this architecture for real vehicles, MissionFlow AI must acquire long-term, high-frequency temporal telemetry for automotive components, complete with verified end-of-life dates.
+
+## Product Integration
+The validated C-MAPSS model (`maintenance_cmapss_v3`) has been successfully integrated into the MissionFlow AI Fleet ecosystem.
+
+## RUL to Health Score
+Since Remaining Useful Life (RUL) represents raw cycles, we deterministically map it to a user-friendly 0-100% Health Score. 
+Formula: `Health Score = max(0.0, min(100.0, (RUL / 150.0) * 100))`
+This logic caps maximum health at 150 cycles and scales linearly downwards as degradation progresses.
+
+## RUL to Risk
+Risk Level is defined by strict deterministic thresholds tied to the regression output:
+- **HEALTHY**: RUL > 80 cycles
+- **ATTENTION**: 50 < RUL <= 80 cycles
+- **MEDIUM RISK**: 30 < RUL <= 50 cycles
+- **HIGH RISK / CRITICAL**: RUL <= 30 cycles
+
+## Maintenance Alert Logic
+When the API generates a prediction resulting in `HIGH RISK`, `MEDIUM RISK`, or `CRITICAL`, it connects to the MongoDB `missionflow.alerts` collection.
+**Duplicate Prevention**: The system checks if an unresolved alert (`type="MAINTENANCE_PREDICTION"`) already exists for this specific asset. If so, a duplicate is prevented, maintaining a clean alert stream.
+
+## API Response
+The `POST /predictions/maintenance` endpoint detects the presence of C-MAPSS specific sensor telemetry and automatically routes to the benchmark model, dynamically generating the 5-cycle temporal history from MongoDB.
+Response includes: `asset_id`, `predicted_rul`, `health_score`, `risk_level`, `failure_probability`, `model_version`, `prediction_timestamp`, `domain_note`, and `top_features` (for explainability).
+
+## Frontend Integration
+The Fleet/Vehicle UI prominently displays the **Predicted RUL** alongside the calculated health and risk metrics. A small "Why?" section displays the top 3 contributing sensor signals (e.g., rolling mean of sensor 4) driving the prediction.
+
+## Benchmark Domain Limitation
+To remain scientifically honest, the AI Health dashboard prominently labels the prediction as **Predictive Maintenance Benchmark (NASA C-MAPSS)** to clearly distinguish this demonstration from actual road-fleet telemetry prediction.
+
+## End-to-End Verification
+The complete flow has been successfully validated: API request → C-MAPSS temporal model inference → Risk calculation → MongoDB Alert persistence → Frontend Alert/Vehicle Health display.
