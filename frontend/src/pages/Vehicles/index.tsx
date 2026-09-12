@@ -32,7 +32,6 @@ export function VehiclesPage() {
   const handlePredict = async () => {
     setLoading(true);
     try {
-      // Create features from vehicle data (using fallbacks for missing raw telemetry in standard fleet obj)
       const features = {
         vehicle_id: vehicle.vehicle_id,
         SoC: vehicle.soc || 0.85,
@@ -53,15 +52,15 @@ export function VehiclesPage() {
     }
   };
 
-  if (error) return <div className="p-8 text-red-500">{error}</div>;
-  if (vehicles.length === 0 && !loading) return <div className="p-8 text-muted-foreground">No vehicles found. Seed the database first.</div>;
+  if (error) return <div className="p-4 md:p-8 text-red-500 font-medium">{error}</div>;
+  if (vehicles.length === 0 && !loading) return <div className="p-4 md:p-8 text-muted-foreground">No vehicles found. Seed the database first.</div>;
 
   return (
-    <div className="p-8 bg-background min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Vehicle Details & Predictive Maintenance</h1>
+    <div className="p-4 md:p-8 bg-background min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Vehicle Details & AI Health</h1>
         <select 
-          className="bg-surface border border-border text-foreground p-2 rounded"
+          className="bg-surface border border-border text-foreground p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto"
           value={selectedId}
           onChange={e => setSelectedId(e.target.value)}
         >
@@ -72,63 +71,75 @@ export function VehiclesPage() {
       </div>
       
       {loading && !vehicle ? (
-        <div className="text-muted-foreground">Loading vehicle...</div>
+        <div className="text-muted-foreground animate-pulse">Loading vehicle...</div>
       ) : vehicle ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Vehicle Info */}
-          <div className="bg-surface p-6 rounded-xl border border-border">
-            <h2 className="text-xl font-bold text-foreground mb-4">Vehicle Information</h2>
+          <div className="bg-surface p-4 md:p-6 rounded-xl border border-border">
+            <h2 className="text-lg md:text-xl font-bold text-foreground mb-4">Vehicle Information</h2>
             <div className="space-y-4 mb-6 text-foreground">
-              <p><span className="text-muted-foreground">ID:</span> {vehicle.vehicle_id}</p>
-              <p><span className="text-muted-foreground">Type:</span> {vehicle.type || 'Electric Truck'}</p>
-              <p><span className="text-muted-foreground">Odometer:</span> {vehicle.mileage || 0} miles</p>
-              <p><span className="text-muted-foreground">Current Status:</span> {vehicle.status}</p>
+              <div className="flex justify-between border-b border-border pb-2">
+                <span className="text-muted-foreground">ID</span>
+                <span className="font-medium">{vehicle.vehicle_id}</span>
+              </div>
+              <div className="flex justify-between border-b border-border pb-2">
+                <span className="text-muted-foreground">Type</span>
+                <span className="font-medium">{vehicle.type || 'Electric Truck'}</span>
+              </div>
+              <div className="flex justify-between border-b border-border pb-2">
+                <span className="text-muted-foreground">Odometer</span>
+                <span className="font-medium">{vehicle.mileage || 0} miles</span>
+              </div>
+              <div className="flex justify-between border-b border-border pb-2">
+                <span className="text-muted-foreground">Current Status</span>
+                <span className="font-medium capitalize">{vehicle.status}</span>
+              </div>
             </div>
             
             <button 
               onClick={handlePredict} 
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors"
+              className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50"
             >
               {loading && prediction === null ? "Prediction running..." : "Run AI Health Prediction"}
             </button>
           </div>
 
           {/* Prediction Output */}
-          <div className="bg-surface p-6 rounded-xl border border-border flex flex-col">
-            <h2 className="text-xl font-bold text-foreground mb-4">AI VEHICLE HEALTH</h2>
+          <div className="bg-surface p-4 md:p-6 rounded-xl border border-border flex flex-col h-full">
+            <h2 className="text-lg md:text-xl font-bold text-foreground mb-4">AI VEHICLE HEALTH</h2>
             
             {!prediction ? (
-              <div className="flex-1 flex items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-lg p-8 text-center">
-                Run prediction to view AI output from the predictive-maintenance model.
+              <div className="flex-1 flex items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-lg p-6 md:p-8 text-center text-sm md:text-base">
+                Select a vehicle and run prediction to view AI output from the predictive-maintenance model.
               </div>
             ) : (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-background border border-border rounded-lg">
-                    <p className="text-sm text-muted-foreground">Health Score</p>
-                    <p className="text-3xl font-bold text-foreground">{prediction.health_score.toFixed(1)}%</p>
+              <div className="space-y-4 md:space-y-6 flex-1 flex flex-col justify-between">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-background border border-border rounded-lg shadow-sm">
+                    <p className="text-sm text-muted-foreground mb-1">Health Score</p>
+                    <p className="text-2xl md:text-3xl font-bold text-foreground">{prediction.health_score.toFixed(1)}%</p>
                   </div>
-                  <div className="p-4 bg-background border border-border rounded-lg">
-                    <p className="text-sm text-muted-foreground">Failure Probability</p>
-                    <p className="text-3xl font-bold text-foreground">{(prediction.failure_probability * 100).toFixed(1)}%</p>
+                  <div className="p-4 bg-background border border-border rounded-lg shadow-sm">
+                    <p className="text-sm text-muted-foreground mb-1">Failure Risk</p>
+                    <p className="text-2xl md:text-3xl font-bold text-foreground">{(prediction.failure_probability * 100).toFixed(1)}%</p>
                   </div>
                 </div>
                 
-                <div className={`p-6 border rounded-lg ${
+                <div className={`p-4 md:p-6 border rounded-lg shadow-sm ${
                   prediction.risk_level === 'CRITICAL' ? 'bg-red-500/10 border-red-500' :
                   prediction.risk_level === 'ATTENTION' || prediction.risk_level === 'HIGH RISK' ? 'bg-yellow-500/10 border-yellow-500' :
                   'bg-green-500/10 border-green-500'
                 }`}>
-                  <p className="text-sm font-bold opacity-80 mb-1">RISK LEVEL</p>
-                  <p className={`text-2xl font-bold ${
+                  <p className="text-xs md:text-sm font-bold opacity-80 mb-1">RISK LEVEL</p>
+                  <p className={`text-xl md:text-2xl font-bold ${
                     prediction.risk_level === 'CRITICAL' ? 'text-red-500' :
                     prediction.risk_level === 'ATTENTION' || prediction.risk_level === 'HIGH RISK' ? 'text-yellow-500' :
                     'text-green-500'
                   }`}>{prediction.risk_level}</p>
                 </div>
                 
-                <div className="pt-4 border-t border-border">
+                <div className="pt-4 border-t border-border mt-auto">
                   <p className="text-xs text-muted-foreground font-bold">Generated by trained predictive-maintenance model</p>
                   <p className="text-xs text-muted-foreground mt-1">Model Version: {prediction.model_version}</p>
                   <p className="text-xs text-muted-foreground mt-1">Timestamp: {new Date().toISOString()}</p>
