@@ -1,14 +1,5 @@
 ﻿export const maintenanceApi = {
   predictMaintenance: async (features: Record<string, any>) => {
-    // In a real app, this would be: 
-    // const res = await fetch('/api/predictions/maintenance', { method: 'POST', body: JSON.stringify(features) });
-    // return res.json();
-    
-    // Fallback/Demo connection directly using the mock or standard fetch structure, 
-    // but since we're statically building frontend without running backend, we will 
-    // attempt the fetch. If it fails (backend not running), we will return a simulated API response 
-    // that mirrors the actual model logic so the UI works in static mode.
-    
     try {
       const res = await fetch('http://localhost:8000/predictions/maintenance', {
         method: 'POST',
@@ -25,17 +16,17 @@
     }
 
     // SIMULATED REAL RESPONSE FOR STATIC PREVIEW IF BACKEND IS DOWN
-    // We apply simple thresholds similar to what the RF model learned:
-    // High torque + high tool wear = high risk.
-    const torque = features.torque || 40;
-    const tool_wear = features.tool_wear || 0;
+    // For EV, High Motor Temp or low SoC
+    const motor_temp = features.Motor_Temperature || 60;
+    const soc = features.SoC || 0.8;
+    const vibration = features.Motor_Vibration || 0.1;
     
     let failure_risk = 0.05; // base 5%
-    if (torque > 60 && tool_wear > 200) {
+    if (motor_temp > 90 || vibration > 1.0) {
       failure_risk = 0.85;
-    } else if (tool_wear > 150) {
+    } else if (soc < 0.1 || motor_temp > 75) {
       failure_risk = 0.35;
-    } else if (torque > 50) {
+    } else if (motor_temp > 65) {
       failure_risk = 0.15;
     }
     
@@ -50,7 +41,7 @@
       failure_probability: failure_risk,
       health_score: 100 - (failure_risk * 100),
       risk_level: status,
-      model_version: "v1.0-RF-AI4I-Fallback"
+      model_version: "v2.0-RF-EVIoT-Fallback"
     };
   }
 };

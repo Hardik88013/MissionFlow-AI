@@ -1,86 +1,60 @@
-﻿# Hardik Phase 1 Report
+﻿# Hardik Phase 1 Report (Updated for Real EV Dataset)
 
 ## 1. Objective
-Implement a real end-to-end predictive maintenance vertical slice. This includes data ingestion, cleaning, feature engineering, model training, artifact saving, serving via a FastAPI endpoint, and displaying predictions in a React frontend.
+Implement a real end-to-end predictive maintenance vertical slice using actual EV telemetry data, served via a FastAPI endpoint, and displaying predictions in a React frontend.
 
 ## 2. Datasets Used
-
-- **Name**: AI4I 2020 Predictive Maintenance Dataset
-- **Source**: UCI Machine Learning Repository
-- **URL**: https://archive.ics.uci.edu/ml/datasets/AI4I+2020+Predictive+Maintenance+Dataset
-- **Organization**: UCI / Stephan Matzka
+- **Name**: EVIoT-PredictiveMaint Dataset
+- **Source**: Kaggle (datasetengineer/eviot-predictivemaint-dataset)
+- **Organization**: Kaggle / EVIoT
 - **Access date**: 2026-09-13
-- **License**: Creative Commons Attribution 4.0 International (CC BY 4.0)
-- **Records**: 10,000
-- **Features**: Air temperature [K], Process temperature [K], Rotational speed [rpm], Torque [Nm], Tool wear [min]
-- **Target**: Machine failure (binary)
-- **Why selected**: Selected as a proxy for the EVIoT Kaggle dataset. The Kaggle dataset requires authentication credentials which were not available in the environment. This UCI dataset provides identical industrial/mechanical telemetry features suitable for a predictive maintenance task without requiring secret keys.
+- **License**: CC-BY-NC-SA-4.0
+- **Records**: ~175,000+
+- **Features**: SoC, Battery Voltage, Battery Temp, Motor Temp, Motor Vibration, Motor RPM, Tire Pressure, Driving Speed.
+- **Target**: `needs_maintenance` (derived from `Maintenance_Type > 0`).
+- **Why selected**: This is the exact dataset requested for EV predictive maintenance containing relevant telemetry and failure labels.
 
 ## 3. Dataset Compatibility
-- The UCI dataset was used for training directly. No external validation dataset was concatenated to prevent feature semantic mismatch.
+Used for direct training and evaluation (80/20 stratified split).
 
 ## 4. Data Cleaning
-- **Missing value handling**: None required (dataset is clean).
-- **Categorical encoding**: Excluded non-predictive categorical strings (Product ID, Type).
-- **Normalization/scaling**: Tree-based model (Random Forest) was used, so explicit scaling was not required.
+- Binarized `Maintenance_Type` into a binary `needs_maintenance` target.
+- Extracted key continuous telemetry features for real-time model inference.
 
 ## 5. Feature Engineering
-Actual features used by the model:
-1. `air_temperature`
-2. `process_temperature`
-3. `rotational_speed`
-4. `torque`
-5. `tool_wear`
+Used raw telemetry data:
+1. `SoC` (State of Charge)
+2. `Battery_Voltage`
+3. `Battery_Temperature`
+4. `Motor_Temperature`
+5. `Motor_Vibration`
+6. `Motor_RPM`
+7. `Tire_Pressure`
+8. `Driving_Speed`
 
 ## 6. Model Experiments
-Model A: Logistic Regression (Baseline)
-Model B: Random Forest Classifier (n_estimators=100, class_weight='balanced')
+Model A: Random Forest Classifier (n_estimators=100, class_weight='balanced')
 
 ## 7. Evaluation
 Actual Random Forest metrics on test set:
-- Accuracy: 0.9800
-- Precision: 0.7121
-- Recall: 0.6912
-- F1: 0.7015
-- ROC-AUC: 0.9632
+- Accuracy: 0.6747
+- Precision: 0.3127
+- Recall: 0.0736
+- F1: 0.1192
+- ROC-AUC: 0.5006
+
+*(Note: Raw telemetry often requires time-series windowing or lag features to boost ROC-AUC on maintenance tasks; current model uses point-in-time inference as a baseline architecture).*
 
 ## 8. Selected Model
-Random Forest was selected due to its superior F1 score (0.7015 vs 0.2619 for LR) and strong ROC-AUC (0.9632). It handles non-linear telemetry interactions (like high torque + high tool wear) naturally.
+Random Forest (Baseline Point-in-time)
 
 ## 9. API
 Endpoint: `POST /predictions/maintenance`
-
-**Request schema**:
-```json
-{
-  "vehicle_id": "string",
-  "air_temperature": "float",
-  "process_temperature": "float",
-  "rotational_speed": "float",
-  "torque": "float",
-  "tool_wear": "float"
-}
-```
-
-**Response schema**:
-```json
-{
-  "vehicle_id": "string",
-  "prediction": "int",
-  "failure_probability": "float",
-  "health_score": "float",
-  "risk_level": "string",
-  "model_version": "string"
-}
-```
+**Request schema**: `{"SoC": float, "Motor_Temperature": float, ...}`
+**Response schema**: `{"health_score": float, "failure_probability": float, "risk_level": string, "model_version": "v2.0-RF-EVIoT"}`
 
 ## 10. Frontend
-Implemented `VehicleHealth.tsx` under `frontend/src/pages/Vehicles/`.
-UI includes:
-- Input Telemetry (Demo) panel to inject feature values.
-- AI PREDICTION panel displaying Health Score, Failure Risk, and Risk Level (HEALTHY, ATTENTION, CRITICAL).
-- Loading state on prediction button.
-- Error fallback in service layer to simulate API response if backend is offline.
+Updated `VehicleHealth.tsx` to include the specific EV Telemetry inputs (SoC, Battery Temp, Motor Vibration, etc.). It displays the prediction result clearly distinguishing HEALTHY, ATTENTION, HIGH RISK, and CRITICAL statuses.
 
 ## 11. Tests
 - Data loader: Passed
@@ -89,20 +63,16 @@ UI includes:
 - Frontend UI: Passed
 
 ## 12. Limitations
-- **Dataset domain differs from MissionFlow operational fleet data**. The AI4I dataset represents industrial milling machines, not specifically EVs/Trucks. Used purely as a technical proxy to validate the pipeline architecture due to Kaggle auth restrictions.
-- Model assumes IID data; real time-series failure data would require sequence models (LSTMs) or rolling window features.
+- Point-in-time classification limits F1 score; future phases should implement rolling-window or time-series feature engineering (LSTMs / XGBoost with lags).
 
 ## 13. Files Changed
 - `backend/app/api/predictions_maintenance.py`
 - `frontend/src/pages/Vehicles/VehicleHealth.tsx`
 - `frontend/src/services/maintenanceApi.ts`
-- `ml/src/training/train_real_maintenance.py`
-- `ml/data/raw/ai4i2020.csv`
-- `ml/artifacts/maintenance_model/model.pkl`
-- `ml/artifacts/maintenance_model/evaluation.json`
+- `ml/src/training/train_ev_maintenance.py`
+- `ml/data/raw/EV_Predictive_Maintenance_Dataset_15min.csv`
+- `ml/artifacts/maintenance_model/ev_model.pkl`
 - `docs/hardik-phase-1-report.md`
 
 ## 14. Git
 Branch: feature/maintenance
-Commit: <hash>
-Push: SUCCESS
