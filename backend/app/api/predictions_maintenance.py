@@ -5,7 +5,7 @@ import pickle
 import json
 import numpy as np
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
 from app.db.mongodb import db
 
 router = APIRouter(prefix="/predictions/maintenance", tags=["predictions"])
@@ -18,6 +18,7 @@ CMAPSS_META_PATH = os.path.join(BASE_DIR, '..', '..', '..', 'ml', 'artifacts', '
 
 models = {"ev": None, "cmapss": None}
 cmapss_features = []
+cmapss_top_features = []
 
 def load_models():
     if os.path.exists(OLD_MODEL_PATH):
@@ -29,8 +30,9 @@ def load_models():
             models["cmapss"] = pickle.load(f)
         with open(CMAPSS_META_PATH, 'r') as f:
             meta = json.load(f)
-            global cmapss_features
+            global cmapss_features, cmapss_top_features
             cmapss_features = meta.get("features", [])
+            cmapss_top_features = meta.get("top_features", [])[:3]
 
 @router.post("/")
 async def predict_maintenance(features: Dict[str, Any]):
@@ -53,7 +55,7 @@ async def predict_maintenance(features: Dict[str, Any]):
             return {"error": "CMAPSS benchmark model not found."}
             
         record = {**features}
-        record["timestamp"] = datetime.utcnow()
+        record["timestamp"] = datetime.now(timezone.utc).isoformat()
         record["engine_id"] = vehicle_id
         await db.cmapss_telemetry.insert_one(record)
         
@@ -81,35 +83,76 @@ async def predict_maintenance(features: Dict[str, Any]):
         
         # Risk thresholds (30 was our trained classifier horizon)
         risk_level = "HEALTHY"
+        severity = "low"
         if rul_pred <= 30:
-            risk_level = "CRITICAL"
-        elif rul_pred <= 50:
             risk_level = "HIGH RISK"
+            severity = "critical"
+        elif rul_pred <= 50:
+            risk_level = "MEDIUM RISK"
+            severity = "high"
         elif rul_pred <= 80:
             risk_level = "ATTENTION"
+            severity = "attention"
             
         # Simulated health score 0-100 based on RUL capping at 150
         health_score = max(0.0, min(100.0, (rul_pred / 150.0) * 100))
+        failure_prob = 1.0 - min(1.0, float(rul_pred)/100.0)
+        
+        # Save prediction history
+        pred_record = {
+            "asset_id": vehicle_id,
+            "predicted_rul": float(rul_pred),
+            "failure_probability": float(failure_prob),
+            "risk_level": risk_level,
+            "model_version": "maintenance_cmapss_v3",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.maintenance_predictions.insert_one(pred_record)
+        
+        # Alert Generation Logic (Prevent duplicates)
+        if risk_level in ["HIGH RISK", "MEDIUM RISK", "CRITICAL", "ATTENTION"]:
+            existing_alert = await db.alerts.find_one({
+                "vehicle_id": vehicle_id,
+                "resolved": False,
+                "type": {"$in": ["critical", "high", "attention", "MAINTENANCE_PREDICTION"]}
+            })
+            
+            if not existing_alert:
+                alert_doc = {
+                    "alert_id": f"ALT-PRED-{int(datetime.now(timezone.utc).timestamp())}",
+                    "vehicle_id": vehicle_id,
+                    "type": severity,
+                    "message": f"AI Benchmark detected engine degradation. Predicted RUL: {rul_pred:.1f} cycles.",
+                    "risk_level": risk_level,
+                    "predicted_rul": float(rul_pred),
+                    "model_version": "maintenance_cmapss_v3",
+                    "resolved": False,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.alerts.insert_one(alert_doc)
         
         return {
             "asset_id": vehicle_id,
             "predicted_rul": float(rul_pred),
-            "health_score": float(health_score),`n            "failure_probability": 1.0 - min(1.0, float(rul_pred)/100.0),`n            "prediction": int(rul_pred <= 30),
+            "health_score": float(health_score),
+            "failure_probability": float(failure_prob),
+            "prediction": int(rul_pred <= 30),
             "risk_level": risk_level,
             "model_version": "maintenance_cmapss_v3",
-            "prediction_timestamp": datetime.utcnow().isoformat(),
-            "domain_note": "Aero-engine benchmark (C-MAPSS)"
+            "prediction_timestamp": datetime.now(timezone.utc).isoformat(),
+            "domain_note": "Predictive Maintenance Benchmark (NASA C-MAPSS)",
+            "top_features": cmapss_top_features
         }
     else:
         # Fallback to EVIoT simulated prediction (Retired model)
         if models["ev"] is None:
              return {"error": "Temporal EV model not found."}
              
-        # ... logic for EV model (abbreviated for size, just returning a static fallback since it's retired)
         return {
             "asset_id": vehicle_id,
             "error": "The EVIoT dataset has been officially RETIRED due to lack of predictive signal. Please use mode='cmapss_benchmark' for valid predictive maintenance API calls, or await real fleet telemetry integration.",
             "health_score": 50,
-            "risk_level": "UNKNOWN"
+            "risk_level": "UNKNOWN",
+            "prediction": 0,
+            "failure_probability": 0.0
         }
-

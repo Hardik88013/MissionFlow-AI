@@ -49,7 +49,7 @@ export function FleetPage() {
           </div>
 
           <div className="bg-surface rounded-xl border border-border p-4 md:p-6">
-            <h2 className="text-lg md:text-xl font-bold text-foreground mb-4">Vehicle List (MongoDB Data)</h2>
+            <h2 className="text-lg md:text-xl font-bold text-foreground mb-4 flex items-center justify-between">Vehicle List (MongoDB Data)<span className="text-xs font-normal px-2 py-1 bg-yellow-500/20 text-yellow-600 rounded">Benchmark / Demo Assets</span></h2>
             <div className="space-y-4">
               {fleet.map(v => (
                 <div key={v.vehicle_id} className="flex flex-col md:flex-row justify-between md:items-center gap-4 p-4 border border-border rounded-lg bg-surface-elevated hover:border-primary/50 transition-colors cursor-pointer">
@@ -76,3 +76,4 @@ export function FleetPage() {
     </div>
   );
 }
+
