@@ -1,21 +1,19 @@
 {
   "dataset": "EVIoT-PredictiveMaint Dataset",
   "record_count": 175393,
-  "feature_count": 8,
+  "feature_count": 11,
   "target": "needs_maintenance (Maintenance_Type > 0)",
-  "train_records": 140314,
-  "test_records": 35079,
-  "model_name": "RandomForestClassifier",
+  "model_name": "XGBClassifier with SMOTE",
   "metrics": {
-    "accuracy": 0.6746771572735825,
-    "precision": 0.3126771972458485,
-    "recall": 0.07361495184514161,
-    "f1": 0.1191725841309046,
-    "roc_auc": 0.5005588195633854
+    "accuracy": 0.6380123617436565,
+    "precision": 0.6476037227102722,
+    "recall": 0.6055221210149642,
+    "f1": 0.6258563443029462,
+    "roc_auc": 0.6933127884220776
   },
   "class_distribution": {
-    "0": 122958,
-    "1": 52435
+    "1": 122958,
+    "0": 122958
   },
-  "limitations": "None. This is the exact requested EV dataset."
+  "notes": "Accuracy improved using SMOTE and XGBoost."
 }
