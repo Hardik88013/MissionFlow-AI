@@ -2,28 +2,42 @@
 MissionFlow AI
 Fleet Tracking WebSocket
 
-Handles live vehicle tracking state and WebSocket connections.
+Handles live vehicle tracking state and ML-based ETA updates.
 """
 
+import asyncio
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from math import asin, cos, radians, sin, sqrt
+from pathlib import Path
 from typing import Dict, List, Optional
 
+import joblib
+import pandas as pd
 from fastapi import WebSocket
 
 
-# ============================================================
-# LIVE VEHICLE STATE
-# ============================================================
+# ---------------------------------------------------------------------------
+# ETA MODEL
+# ---------------------------------------------------------------------------
+
+MODEL_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "ml"
+    / "artifacts"
+    / "eta_model"
+    / "eta_model.joblib"
+)
+
+eta_model = joblib.load(MODEL_PATH)
+
+
+# ---------------------------------------------------------------------------
+# TRACKING STATE
+# ---------------------------------------------------------------------------
 
 @dataclass
 class VehicleTrackingState:
-    """
-    Current live tracking information for a vehicle.
-
-    Vehicle master data / CRUD remains owned by the fleet module.
-    """
-
     vehicle_id: int
     latitude: float
     longitude: float
@@ -34,15 +48,7 @@ class VehicleTrackingState:
     timestamp: str = ""
 
 
-# ============================================================
-# TRACKING STORE
-# ============================================================
-
 class FleetTracker:
-    """
-    In-memory store for current vehicle tracking states.
-    """
-
     def __init__(self) -> None:
         self._vehicles: Dict[int, VehicleTrackingState] = {}
 
@@ -57,7 +63,7 @@ class FleetTracker:
         eta_minutes: Optional[float] = None,
     ) -> VehicleTrackingState:
 
-        state = VehicleTrackingState(
+        vehicle = VehicleTrackingState(
             vehicle_id=vehicle_id,
             latitude=latitude,
             longitude=longitude,
@@ -68,9 +74,9 @@ class FleetTracker:
             timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
-        self._vehicles[vehicle_id] = state
+        self._vehicles[vehicle_id] = vehicle
 
-        return state
+        return vehicle
 
     def get_vehicle(
         self,
@@ -79,100 +85,141 @@ class FleetTracker:
 
         return self._vehicles.get(vehicle_id)
 
-    def get_all_vehicles(
-        self,
-    ) -> List[VehicleTrackingState]:
-
+    def get_all_vehicles(self) -> List[VehicleTrackingState]:
         return list(self._vehicles.values())
 
-    def remove_vehicle(
-        self,
-        vehicle_id: int,
-    ) -> None:
-
+    def remove_vehicle(self, vehicle_id: int) -> None:
         self._vehicles.pop(vehicle_id, None)
 
-
-# ============================================================
-# SHARED TRACKER
-# ============================================================
 
 fleet_tracker = FleetTracker()
 
 
-# ============================================================
-# WEBSOCKET CONNECTION MANAGER
-# ============================================================
+# ---------------------------------------------------------------------------
+# CONNECTION MANAGER
+# ---------------------------------------------------------------------------
 
 class FleetConnectionManager:
-    """
-    Manages all currently connected fleet tracking clients.
-    """
-
     def __init__(self) -> None:
         self.active_connections: List[WebSocket] = []
 
-    async def connect(
-        self,
-        websocket: WebSocket,
-    ) -> None:
-
+    async def connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
-
         self.active_connections.append(websocket)
 
-    def disconnect(
-        self,
-        websocket: WebSocket,
-    ) -> None:
-
+    def disconnect(self, websocket: WebSocket) -> None:
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
 
-    async def broadcast(
-        self,
-        message: dict,
-    ) -> None:
+    async def broadcast(self, message: dict) -> None:
 
-        disconnected_connections = []
+        disconnected: List[WebSocket] = []
 
         for websocket in self.active_connections:
+
             try:
                 await websocket.send_json(message)
-            except Exception:
-                disconnected_connections.append(websocket)
 
-        for websocket in disconnected_connections:
+            except Exception:
+                disconnected.append(websocket)
+
+        for websocket in disconnected:
             self.disconnect(websocket)
 
-
-# ============================================================
-# SHARED CONNECTION MANAGER
-# ============================================================
 
 fleet_connection_manager = FleetConnectionManager()
 
 
-# ============================================================
-# SERIALIZATION
-# ============================================================
+# ---------------------------------------------------------------------------
+# DISTANCE / ETA HELPERS
+# ---------------------------------------------------------------------------
+
+def haversine_distance_km(
+    origin_latitude: float,
+    origin_longitude: float,
+    destination_latitude: float,
+    destination_longitude: float,
+) -> float:
+
+    lat1 = radians(origin_latitude)
+    lon1 = radians(origin_longitude)
+
+    lat2 = radians(destination_latitude)
+    lon2 = radians(destination_longitude)
+
+    delta_lat = lat2 - lat1
+    delta_lon = lon2 - lon1
+
+    a = (
+        sin(delta_lat / 2) ** 2
+        + cos(lat1)
+        * cos(lat2)
+        * sin(delta_lon / 2) ** 2
+    )
+
+    c = 2 * asin(sqrt(a))
+
+    earth_radius_km = 6371.0088
+
+    return earth_radius_km * c
+
+
+def predict_eta(
+    start_latitude: float,
+    start_longitude: float,
+    end_latitude: float,
+    end_longitude: float,
+) -> float:
+
+    distance_km = haversine_distance_km(
+        start_latitude,
+        start_longitude,
+        end_latitude,
+        end_longitude,
+    )
+
+    now = datetime.now()
+
+    hour = now.hour
+    day_of_week = now.weekday()
+    is_weekend = int(day_of_week >= 5)
+
+    features = pd.DataFrame(
+        [
+            {
+                "straight_line_distance_km": distance_km,
+                "start_longitude": start_longitude,
+                "start_latitude": start_latitude,
+                "end_longitude": end_longitude,
+                "end_latitude": end_latitude,
+                "hour": hour,
+                "day_of_week": day_of_week,
+                "is_weekend": is_weekend,
+                "CALL_TYPE": "Other",
+                "ORIGIN_STAND": 0,
+            }
+        ]
+    )
+
+    prediction = eta_model.predict(features)[0]
+
+    # Round ETA to one decimal place for clean dashboard display.
+    return round(max(0.0, float(prediction)), 1)
+
+
+# ---------------------------------------------------------------------------
+# WEBSOCKET MESSAGE
+# ---------------------------------------------------------------------------
 
 def build_vehicle_update(
     vehicle: VehicleTrackingState,
 ) -> dict:
-    """
-    Convert tracking state into a WebSocket payload.
-    """
 
     return {
         "type": "vehicle_update",
         "vehicle": asdict(vehicle),
     }
 
-
-# ============================================================
-# UPDATE + BROADCAST
-# ============================================================
 
 async def update_vehicle_and_broadcast(
     vehicle_id: int,
@@ -183,10 +230,6 @@ async def update_vehicle_and_broadcast(
     status: str = "en_route",
     eta_minutes: Optional[float] = None,
 ) -> VehicleTrackingState:
-    """
-    Update a vehicle's live state and broadcast it
-    to all connected fleet tracking clients.
-    """
 
     vehicle = fleet_tracker.update_vehicle(
         vehicle_id=vehicle_id,
@@ -205,20 +248,78 @@ async def update_vehicle_and_broadcast(
     return vehicle
 
 
-# ============================================================
-# WEBSOCKET HANDLER
-# ============================================================
+# ---------------------------------------------------------------------------
+# DEMO VEHICLE
+# ---------------------------------------------------------------------------
+
+async def demo_vehicle_broadcaster() -> None:
+    """
+    Simulates a vehicle moving toward a destination.
+
+    The vehicle position is simulated, but ETA is calculated
+    using the trained MissionFlow ETA model.
+    """
+
+    latitude = 10.8510
+    longitude = 76.2720
+
+    destination_latitude = 10.9010
+    destination_longitude = 76.3220
+
+    current_stop = 3
+
+    while True:
+
+        if fleet_connection_manager.active_connections:
+
+            eta_minutes = predict_eta(
+                start_latitude=latitude,
+                start_longitude=longitude,
+                end_latitude=destination_latitude,
+                end_longitude=destination_longitude,
+            )
+
+            await update_vehicle_and_broadcast(
+                vehicle_id=101,
+                latitude=latitude,
+                longitude=longitude,
+                route_id=5,
+                current_stop=current_stop,
+                status="en_route",
+                eta_minutes=eta_minutes,
+            )
+
+            # Move vehicle toward destination.
+            latitude += 0.00025
+            longitude += 0.00025
+
+            # Once destination is reached, start a new stop.
+            if (
+                latitude >= destination_latitude
+                or longitude >= destination_longitude
+            ):
+                latitude = 10.8510
+                longitude = 76.2720
+                current_stop += 1
+
+                if current_stop > 6:
+                    current_stop = 1
+
+        await asyncio.sleep(3)
+
+
+# ---------------------------------------------------------------------------
+# WEBSOCKET ENDPOINT
+# ---------------------------------------------------------------------------
 
 async def fleet_tracking_websocket(
     websocket: WebSocket,
 ) -> None:
-    """
-    Handle a fleet tracking WebSocket connection.
-    """
 
     await fleet_connection_manager.connect(websocket)
 
     try:
+
         await websocket.send_json(
             {
                 "type": "connection",
@@ -227,6 +328,7 @@ async def fleet_tracking_websocket(
         )
 
         while True:
+
             message = await websocket.receive_text()
 
             await websocket.send_json(
@@ -237,4 +339,5 @@ async def fleet_tracking_websocket(
             )
 
     finally:
+
         fleet_connection_manager.disconnect(websocket)
