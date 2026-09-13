@@ -2,7 +2,9 @@
 MissionFlow AI
 FastAPI Application
 """
-
+from backend.app.websocket.fleet_tracking import (
+    fleet_tracking_websocket,
+)
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -59,24 +61,7 @@ app.include_router(routes_router)
 
 @app.websocket("/ws/fleet")
 async def fleet_tracking_endpoint(websocket: WebSocket):
-    await websocket.accept()
-
-    await websocket.send_json(
-        {
-            "type": "connection",
-            "status": "connected",
-        }
-    )
-
-    while True:
-        message = await websocket.receive_text()
-
-        await websocket.send_json(
-            {
-                "type": "ack",
-                "message": message,
-            }
-        )
+    await fleet_tracking_websocket(websocket)
 
 
 # ============================================================
