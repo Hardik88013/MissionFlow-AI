@@ -2,6 +2,7 @@
 MissionFlow AI
 FastAPI Application
 """
+from backend.app.api.fleet_tracking import router as fleet_tracking_router
 from backend.app.websocket.fleet_tracking import (
     fleet_tracking_websocket,
 )
@@ -53,7 +54,7 @@ app.include_router(eta_router)
 
 # Route Optimization API
 app.include_router(routes_router)
-
+app.include_router(fleet_tracking_router)
 
 # ============================================================
 # FLEET TRACKING WEBSOCKET
