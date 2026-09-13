@@ -3,9 +3,11 @@ MissionFlow AI
 FastAPI Application
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.api.predictions_eta import router as eta_router
+from backend.app.api.routes import router as routes_router
 
 
 app = FastAPI(
@@ -15,9 +17,71 @@ app = FastAPI(
 )
 
 
+# ============================================================
+# CORS CONFIGURATION
+# ============================================================
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        # Vite development server
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+
+        # Current frontend port
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+
+        # Vite preview server
+        "http://localhost:4173",
+        "http://127.0.0.1:4173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# ============================================================
+# API ROUTES
+# ============================================================
+
 # ETA Prediction API
 app.include_router(eta_router)
 
+# Route Optimization API
+app.include_router(routes_router)
+
+
+# ============================================================
+# FLEET TRACKING WEBSOCKET
+# ============================================================
+
+@app.websocket("/ws/fleet")
+async def fleet_tracking_endpoint(websocket: WebSocket):
+    await websocket.accept()
+
+    await websocket.send_json(
+        {
+            "type": "connection",
+            "status": "connected",
+        }
+    )
+
+    while True:
+        message = await websocket.receive_text()
+
+        await websocket.send_json(
+            {
+                "type": "ack",
+                "message": message,
+            }
+        )
+
+
+# ============================================================
+# ROOT ENDPOINT
+# ============================================================
 
 @app.get("/")
 def root():
@@ -25,6 +89,10 @@ def root():
         "message": "MissionFlow AI API is running"
     }
 
+
+# ============================================================
+# HEALTH CHECK
+# ============================================================
 
 @app.get("/health")
 def health_check():
