@@ -70,31 +70,38 @@ export function Navbar() {
 
           {/* RIGHT: Desktop Actions */}
           <div className="hidden lg:flex items-center gap-6 shrink-0">
+<<<<<<< HEAD
+            <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Search" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
+=======
             <button
               className="text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Search"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}
             >
+>>>>>>> cf47d788f4a362dc82e6895ad2a217ab91dd965b
               <Search className="w-5 h-5" />
             </button>
 
             <ThemeToggle />
+<<<<<<< HEAD
+            <a href="#signin" className="text-sm font-semibold text-foreground hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
+              Sign In
+            </a>
+            <Button className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
+              Request Demo <ArrowRight className="w-4 h-4 ml-1.5" />
+=======
 
             {/* SIGN IN */}
             <a
               href="/login"
               className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
             >
               Sign In
             </a>
 
-            <Button 
-              className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
-            >
+            <Button className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10">
               Request Demo
               <ArrowRight className="w-4 h-4 ml-1.5" />
+>>>>>>> cf47d788f4a362dc82e6895ad2a217ab91dd965b
             </Button>
           </div>
 
@@ -139,20 +146,24 @@ export function Navbar() {
 
           <div className="pt-4 border-t border-border/40 flex flex-col gap-3">
             <ThemeToggle />
+<<<<<<< HEAD
+            <a href="#signin" className="text-base font-medium text-foreground text-center py-2" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
+              Sign In
+            </a>
+            <Button className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
+=======
 
             {/* MOBILE SIGN IN */}
             <a
               href="/login"
               className="text-base font-medium text-foreground text-center py-2"
-              onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
+              onClick={() => setMobileMenuOpen(false)}
             >
               Sign In
             </a>
 
-            <Button 
-              className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
-            >
+            <Button className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold">
+>>>>>>> cf47d788f4a362dc82e6895ad2a217ab91dd965b
               Request Demo
             </Button>
           </div>
