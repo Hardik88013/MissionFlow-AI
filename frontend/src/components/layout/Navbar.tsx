@@ -57,7 +57,7 @@ export function Navbar() {
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
-                onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}
+                onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
               >
                 {link.label}
 
@@ -73,7 +73,7 @@ export function Navbar() {
             <button
               className="text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Search"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
             >
               <Search className="w-5 h-5" />
             </button>
@@ -84,14 +84,14 @@ export function Navbar() {
             <a
               href="/login"
               className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
             >
               Sign In
             </a>
 
             <Button 
               className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Aman"); }}
             >
               Request Demo
               <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -130,7 +130,7 @@ export function Navbar() {
                     ? "text-primary font-bold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
-                onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("This is development phase coming soon - Developer: Hardik"); }}
+                onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
               >
                 {link.label}
               </a>
@@ -144,14 +144,14 @@ export function Navbar() {
             <a
               href="/login"
               className="text-base font-medium text-foreground text-center py-2"
-              onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
+              onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
             >
               Sign In
             </a>
 
             <Button 
               className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold"
-              onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik (Integration)"); }}
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Aman"); }}
             >
               Request Demo
             </Button>

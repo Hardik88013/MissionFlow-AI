@@ -19,26 +19,26 @@ export function LiveMissionNetworkPreview() {
           
           {/* Left Sidebar Navigation */}
           <div className="lg:col-span-2 flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <button onClick={() => alert("This is development phase coming soon - Developer: Devraj")} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap bg-primary/10 text-primary dark:text-[#69E0A5] font-semibold px-4 py-3 rounded-lg shadow-sm border border-primary/20">
+            <button onClick={() => alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj")} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap bg-primary/10 text-primary dark:text-[#69E0A5] font-semibold px-4 py-3 rounded-lg shadow-sm border border-primary/20">
               <MapIcon className="w-5 h-5 text-primary dark:text-[#69E0A5]" />
               <span className="text-sm">Live Map</span>
             </button>
-            <button onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Devraj'); }} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <Truck className="w-5 h-5" />
               <span className="text-sm">Convoys</span>
             </button>
-            <button onClick={() => alert("This is development phase coming soon - Developer: Aman")} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button onClick={() => alert("🚧 Module in Development\n\nThis feature is currently being built by: Aman")} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <Box className="w-5 h-5" />
               <span className="text-sm">Supplies</span>
             </button>
-            <button onClick={() => alert("This is development phase coming soon - Developer: Hardik")} className="flex items-center justify-between w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button onClick={() => alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik")} className="flex items-center justify-between w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5" />
                 <span className="text-sm">Alerts</span>
               </div>
               <span className="bg-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
             </button>
-            <button onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Devraj'); }} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
+            <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="flex items-center gap-3 w-auto lg:w-full flex-shrink-0 whitespace-nowrap hover:bg-surface-elevated text-muted-foreground font-medium px-4 py-3 rounded-lg transition-colors">
               <BarChart3 className="w-5 h-5" />
               <span className="text-sm">Analytics</span>
             </button>
@@ -56,8 +56,8 @@ export function LiveMissionNetworkPreview() {
             <div className="absolute inset-0 p-4">
               {/* Map Controls */}
               <div className="hidden md:flex absolute bottom-6 left-6 flex-col bg-surface rounded-lg shadow-md border border-border/40">
-                <button onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Devraj'); }} className="p-2 border-b border-border/40 hover:bg-surface-elevated text-foreground font-bold">+</button>
-                <button onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Devraj'); }} className="p-2 hover:bg-surface-elevated text-foreground font-bold">-</button>
+                <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="p-2 border-b border-border/40 hover:bg-surface-elevated text-foreground font-bold">+</button>
+                <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="p-2 hover:bg-surface-elevated text-foreground font-bold">-</button>
               </div>
 
               {/* Status Legend */}
@@ -104,7 +104,7 @@ export function LiveMissionNetworkPreview() {
           <div className="lg:col-span-4 bg-surface rounded-2xl border border-border/50 shadow-sm p-6 flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-foreground">Mission Overview</h3>
-              <button onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Devraj'); }} className="text-xs font-semibold bg-surface-elevated px-3 py-1.5 rounded text-foreground border border-border/60 hover:bg-border/20 transition-colors">
+              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }} className="text-xs font-semibold bg-surface-elevated px-3 py-1.5 rounded text-foreground border border-border/60 hover:bg-border/20 transition-colors">
                 All Operations ▾
               </button>
             </div>
@@ -130,7 +130,7 @@ export function LiveMissionNetworkPreview() {
 
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-sm font-bold text-foreground">Recent Activity</h4>
-              <button onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Devraj'); }} className="text-xs font-semibold text-[#00A859] hover:underline">View All →</button>
+              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }} className="text-xs font-semibold text-[#00A859] hover:underline">View All →</button>
             </div>
 
             <div className="flex flex-col gap-4 flex-1">
