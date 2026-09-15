@@ -1,4 +1,4 @@
-﻿import { Container } from "../ui/Container";
+import { Container } from "../ui/Container";
 import { Button } from "../ui/Button";
 import { ArrowRight, PlayCircle, Clock, Layers, Zap, Shield } from "lucide-react";
 
@@ -72,10 +72,10 @@ export function Hero() {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <Button className="w-full sm:w-auto bg-[#00A859] hover:bg-[#008f4c] text-white shadow-lg shadow-green-500/20 rounded-md font-bold px-8 h-12 text-base">
+            <Button className="w-full sm:w-auto bg-[#00A859] hover:bg-[#008f4c] text-white shadow-lg shadow-green-500/20 rounded-md font-bold px-8 h-12 text-base" onClick={() => alert("This is development phase coming soon - Developer: Hardik")}>
               Request Demo <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button variant="outline" className="w-full sm:w-auto bg-background hover:bg-surface-elevated text-foreground border-border/60 rounded-md font-bold px-6 h-12 text-base shadow-sm">
+            <Button variant="outline" className="w-full sm:w-auto bg-background hover:bg-surface-elevated text-foreground border-border/60 rounded-md font-bold px-6 h-12 text-base shadow-sm" onClick={() => alert("This is development phase coming soon - Developer: Hardik")}>
               <PlayCircle className="w-5 h-5 mr-2" /> Watch Video
             </Button>
           </div>
