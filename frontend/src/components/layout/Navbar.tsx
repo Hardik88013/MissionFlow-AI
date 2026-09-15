@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Container } from "../ui/Container";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
@@ -47,6 +47,7 @@ export function Navbar() {
                 className={`relative h-full flex items-center text-sm font-semibold transition-colors ${
                   link.active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
+                onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}
               >
                 {link.label}
                 {link.active && (
@@ -58,14 +59,14 @@ export function Navbar() {
 
           {/* RIGHT: Desktop Actions */}
           <div className="hidden lg:flex items-center gap-6 shrink-0">
-            <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Search">
+            <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Search" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
               <Search className="w-5 h-5" />
             </button>
             <ThemeToggle />
-            <a href="#signin" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <a href="#signin" className="text-sm font-semibold text-foreground hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
               Sign In
             </a>
-            <Button className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10">
+            <Button className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
               Request Demo <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </div>
@@ -95,7 +96,7 @@ export function Navbar() {
                 className={`text-base font-medium transition-colors ${
                   link.active ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"
                 }`}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("This is development phase coming soon - Developer: Hardik"); }}
               >
                 {link.label}
               </a>
@@ -103,10 +104,10 @@ export function Navbar() {
           </nav>
           <div className="pt-4 border-t border-border/40 flex flex-col gap-3">
             <ThemeToggle />
-            <a href="#signin" className="text-base font-medium text-foreground text-center py-2">
+            <a href="#signin" className="text-base font-medium text-foreground text-center py-2" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
               Sign In
             </a>
-            <Button className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold">
+            <Button className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold" onClick={(e) => { e.preventDefault(); alert("This is development phase coming soon - Developer: Hardik"); }}>
               Request Demo
             </Button>
           </div>

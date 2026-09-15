@@ -57,7 +57,7 @@ export function Footer() {
               <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
-                    <a
+                    <a onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Hardik'); }}
                       href={link.href}
                       className="text-body-small hover:text-foreground transition-colors"
                     >
@@ -73,8 +73,8 @@ export function Footer() {
         <div className="mt-16 border-t border-border/40 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <p>Â© 2026 MissionFlow AI. All rights reserved.</p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+            <a onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Hardik'); }} href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+            <a onClick={(e) => { e.preventDefault(); alert('This is development phase coming soon - Developer: Hardik'); }} href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
           </div>
         </div>
       </Container>
