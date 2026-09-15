@@ -1,0 +1,19 @@
+{
+  "dataset": "EVIoT-PredictiveMaint Dataset",
+  "record_count": 175393,
+  "feature_count": 11,
+  "target": "needs_maintenance (Maintenance_Type > 0)",
+  "model_name": "XGBClassifier with SMOTE",
+  "metrics": {
+    "accuracy": 0.6380123617436565,
+    "precision": 0.6476037227102722,
+    "recall": 0.6055221210149642,
+    "f1": 0.6258563443029462,
+    "roc_auc": 0.6933127884220776
+  },
+  "class_distribution": {
+    "1": 122958,
+    "0": 122958
+  },
+  "notes": "Accuracy improved using SMOTE and XGBoost."
+}

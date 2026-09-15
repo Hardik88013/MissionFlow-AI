@@ -1,0 +1,54 @@
+﻿{
+  "info": {
+    "_postman_id": "ab123456-cd78-90ef-gh12-34567890ijkl",
+    "name": "MissionFlow AI - Hardik Phase 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Seed Demo Fleet",
+      "request": {
+        "method": "POST",
+        "url": { "raw": "http://localhost:8000/fleet/seed", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["fleet", "seed"] }
+      }
+    },
+    {
+      "name": "Get All Vehicles",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8000/fleet/", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["fleet", ""] }
+      }
+    },
+    {
+      "name": "Create Vehicle",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"Electric Truck\",\n  \"manufacturer\": \"Tesla\",\n  \"model\": \"Semi\",\n  \"mileage\": 5000\n}"
+        },
+        "url": { "raw": "http://localhost:8000/fleet/", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["fleet", ""] }
+      }
+    },
+    {
+      "name": "Get Alerts",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8000/alerts/", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["alerts", ""] }
+      }
+    },
+    {
+      "name": "Run Prediction",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"SoC\": 0.85,\n  \"Motor_Temperature\": 55.0,\n  \"Motor_Vibration\": 0.2\n}"
+        },
+        "url": { "raw": "http://localhost:8000/predictions/maintenance/", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["predictions", "maintenance", ""] }
+      }
+    }
+  ]
+}
