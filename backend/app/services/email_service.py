@@ -44,4 +44,4 @@ async def send_reset_password_email(email: EmailStr, token: str, frontend_url: s
         return True
     except Exception as e:
         print(f"Error sending email: {e}")
-        return False
+        raise e

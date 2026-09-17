@@ -90,7 +90,14 @@ async def forgot_password(req: ForgotPassword, background_tasks: BackgroundTasks
         raise HTTPException(status_code=404, detail="User not found with this email address")
         
     token = create_reset_token(email_str)
-    background_tasks.add_task(send_reset_password_email, email_str, token, FRONTEND_URL)
+    
+    # Send email synchronously to catch SMTP errors during testing
+    try:
+        success = await send_reset_password_email(email_str, token, FRONTEND_URL)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to send email. Check SMTP server configuration or App Password.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"SMTP Error: {str(e)}")
     
     return {"message": "Reset link has been sent to your email successfully"}
 
