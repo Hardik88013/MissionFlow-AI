@@ -6,6 +6,7 @@ import { Home } from "./pages/Home";
 import { Login } from "./pages/auth/Login";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { Routes as RoutesPage } from "./pages/routes/Routes";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 function App() {
   const { theme } = useTheme();
@@ -24,12 +25,12 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         {/* Mission Control */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
         {/* ETA & Route Optimization */}
         <Route
           path="/dashboard/routes"
-          element={<RoutesPage />}
+          element={<ProtectedRoute><RoutesPage /></ProtectedRoute>}
         />
 
         {/* Unknown routes */}

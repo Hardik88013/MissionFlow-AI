@@ -1,17 +1,30 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowRight, Lock, Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "../../services/authApi";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [registerMode, setRegisterMode] = useState(false);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const navigate = useNavigate();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    // Temporary frontend-only authentication.
-    // Real authentication can be connected later.
-    window.location.href = "/dashboard";
+    setError("");
+    setBusy(true);
+    try {
+      if (registerMode) await authApi.register(email, password);
+      else await authApi.login(email, password);
+      navigate("/dashboard", { replace: true });
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to authenticate");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -73,14 +86,24 @@ export function Login() {
               </div>
             </div>
 
+            {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
             <button
               type="submit"
+              disabled={busy}
               className="w-full h-11 rounded-lg bg-[#00A859] hover:bg-[#008f4c] text-white font-bold flex items-center justify-center gap-2 transition-colors"
             >
-              Enter Mission Control
+              {busy ? "Connecting..." : registerMode ? "Create account" : "Enter Mission Control"}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
+
+          <button
+            type="button"
+            onClick={() => { setRegisterMode(!registerMode); setError(""); }}
+            className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground"
+          >
+            {registerMode ? "Already have an account? Sign in" : "New operator? Create an account"}
+          </button>
 
           <div className="mt-6 pt-5 border-t border-border/40 text-center">
             <a

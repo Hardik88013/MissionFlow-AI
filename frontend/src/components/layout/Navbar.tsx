@@ -84,7 +84,6 @@ export function Navbar() {
             <a
               href="/login"
               className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
-              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
             >
               Sign In
             </a>
@@ -144,7 +143,7 @@ export function Navbar() {
             <a
               href="/login"
               className="text-base font-medium text-foreground text-center py-2"
-              onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
+              onClick={() => setMobileMenuOpen(false)}
             >
               Sign In
             </a>

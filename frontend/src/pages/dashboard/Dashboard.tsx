@@ -22,6 +22,8 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "../../services/authApi";
 
 type VehicleStatus =
   | "en_route"
@@ -102,6 +104,7 @@ const routePoints = [
 ];
 
 export function Dashboard() {
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
   const [socketConnected, setSocketConnected] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(
@@ -251,7 +254,12 @@ export function Dashboard() {
                   <p className="text-[10px] text-slate-500">Fleet Manager</p>
                 </div>
 
-                <ChevronRight className="h-4 w-4 rotate-90 text-slate-400" />
+                <button
+                  onClick={async () => { await authApi.logout(); navigate("/login", { replace: true }); }}
+                  className="rounded-md px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                >
+                  Log out
+                </button>
               </div>
             </div>
           </div>
@@ -1309,6 +1317,5 @@ function LegendRow({
     </div>
   );
 }
-
 
 
