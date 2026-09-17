@@ -6,50 +6,61 @@ from bson import ObjectId
 from backend.app.db.mongodb import db
 from backend.app.models.user import (
     UserCreate, UserLogin, UserInDB, Token,
-    ForgotPassword, ResetPassword, 
+    ForgotPassword, ResetPassword
 )
 from backend.app.services.auth_service import (
     get_password_hash, verify_password, create_access_token,
-    ACCESS_TOKEN_EXPIRE_MINUTES, 
+    ACCESS_TOKEN_EXPIRE_MINUTES,
     create_reset_token, verify_reset_token
 )
 from backend.app.services.email_service import send_reset_password_email
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://missionflowai.vercel.app")
 
 @router.post("/register", response_model=Token)
 async def register(user: UserCreate):
-    existing_user = await db.users.find_one({"email": user.email.lower()})
+    email_str = str(user.email).lower()
+    existing_user = await db.users.find_one({"email": email_str})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
         
-    user_dict = user.dict()
-    user_dict["email"] = user_dict["email"].lower()
-    user_dict["hashed_password"] = get_password_hash(user_dict.pop("password"))
+    user_dict = user.dict() if hasattr(user, "dict") else user.model_dump()
+    user_dict["email"] = email_str
+    user_dict["full_name"] = str(user_dict.get("full_name", ""))
+    
+    raw_password = user_dict.pop("password")
+    user_dict["hashed_password"] = get_password_hash(raw_password)
     user_dict["is_active"] = True
     user_dict["is_google_user"] = False
     
-    result = await db.users.insert_one(user_dict)
+    # Safely insert to db
+    try:
+        result = await db.users.insert_one(user_dict)
+    except Exception as e:
+        print("DB Insert Error:", e)
+        raise HTTPException(status_code=500, detail="Database insertion failed")
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user_dict["email"]}, expires_delta=access_token_expires
+        data={"sub": email_str}, expires_delta=access_token_expires
     )
     
     return {
         "access_token": access_token, 
         "token_type": "bearer",
         "user": {
-            "email": user_dict["email"],
+            "email": email_str,
             "full_name": user_dict["full_name"]
         }
     }
 
 @router.post("/login", response_model=Token)
 async def login(user: UserLogin):
-    db_user = await db.users.find_one({"email": user.email.lower()})
+    email_str = str(user.email).lower()
+    db_user = await db.users.find_one({"email": email_str})
+    
     if not db_user or not db_user.get("hashed_password"):
         raise HTTPException(status_code=401, detail="Invalid email or password")
         
@@ -58,26 +69,25 @@ async def login(user: UserLogin):
         
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": db_user["email"]}, expires_delta=access_token_expires
+        data={"sub": email_str}, expires_delta=access_token_expires
     )
     
     return {
         "access_token": access_token, 
         "token_type": "bearer",
         "user": {
-            "email": db_user["email"],
-            "full_name": db_user.get("full_name", "")
+            "email": email_str,
+            "full_name": str(db_user.get("full_name", ""))
         }
     }
 
-
-
 @router.post("/forgot-password")
 async def forgot_password(req: ForgotPassword, background_tasks: BackgroundTasks):
-    db_user = await db.users.find_one({"email": req.email.lower()})
+    email_str = str(req.email).lower()
+    db_user = await db.users.find_one({"email": email_str})
     if db_user:
-        token = create_reset_token(db_user["email"])
-        background_tasks.add_task(send_reset_password_email, db_user["email"], token, FRONTEND_URL)
+        token = create_reset_token(email_str)
+        background_tasks.add_task(send_reset_password_email, email_str, token, FRONTEND_URL)
     
     return {"message": "If that email is in our system, a reset link has been sent."}
 
