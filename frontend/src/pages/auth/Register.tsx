@@ -44,11 +44,32 @@ export function Register() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
-      {/* Left Side: Form */}
+      
+      {/* Left Side: Big Image and Logo */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-surface items-center justify-center">
+        <img 
+          src="/hero-light.jpg" 
+          alt="MissionFlow Platform" 
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/60 to-background/20"></div>
+        
+        {/* Big Logo in center of left side */}
+        <div className="relative z-10 flex flex-col items-center justify-center p-12 text-center">
+          <img src="/logo.png" alt="MissionFlow AI" className="h-48 w-auto mb-8 drop-shadow-2xl" />
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">Command Your Fleet.<br/>Secure Your Supply Chain.</h2>
+          <p className="text-xl text-white/90 max-w-lg drop-shadow-md">Join the platform powering the next generation of mission-ready logistics.</p>
+        </div>
+      </div>
+
+      {/* Right Side: Form Content */}
       <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 lg:px-16 xl:px-24">
         <div className="w-full max-w-lg">
-          <div className="mb-10 text-left">
+          <div className="mb-10 text-left lg:hidden">
             <img src="/logo.png" alt="MissionFlow AI" className="h-14 w-auto mb-8" />
+          </div>
+
+          <div className="mb-8 text-left">
             <h1 className="text-4xl lg:text-5xl font-bold tracking-tight mb-3">Create Account</h1>
             <p className="text-lg text-muted-foreground">Join MissionFlow AI operations today.</p>
           </div>
@@ -123,19 +144,6 @@ export function Register() {
         </div>
       </div>
 
-      {/* Right Side: Image */}
-      <div className="hidden lg:block lg:w-1/2 relative bg-surface">
-        <img 
-          src="/hero-light.jpg" 
-          alt="MissionFlow Platform" 
-          className="absolute inset-0 w-full h-full object-cover opacity-80"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 p-16 w-full">
-          <h2 className="text-4xl font-bold text-white mb-4">Command Your Fleet.<br/>Secure Your Supply Chain.</h2>
-          <p className="text-lg text-white/80 max-w-md">Join the platform powering the next generation of mission-ready logistics.</p>
-        </div>
-      </div>
     </div>
   );
 }
