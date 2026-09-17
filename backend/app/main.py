@@ -47,7 +47,7 @@ app.add_middleware(
 
 
 app.include_router(eta_router)
-# app.include_router(routes_router)
+app.include_router(routes_router)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
