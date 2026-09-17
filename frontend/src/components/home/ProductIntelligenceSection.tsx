@@ -43,7 +43,7 @@ export function ProductIntelligenceSection() {
         <div className="flex overflow-x-auto hide-scrollbar border-b border-border/50 mb-10 pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex gap-8 min-w-max px-2">
             {tabs.map((tab, idx) => (
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} 
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} 
                 key={tab}
                 className={`pb-4 text-sm font-semibold transition-colors relative whitespace-nowrap ${idx === 0 ? "text-foreground" : "text-muted-foreground hover:text-foreground/80"}`}
               >
@@ -70,22 +70,22 @@ export function ProductIntelligenceSection() {
             
             {/* Sidebar Links - horizontally scrollable on mobile */}
             <div className="p-4 flex flex-row lg:flex-col gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
                 <Car className="w-4 h-4" /> Vehicle Details
               </button>
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm bg-primary/10 text-primary dark:text-[#69E0A5] font-semibold transition-colors">
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm bg-primary/10 text-primary dark:text-[#69E0A5] font-semibold transition-colors">
                 <MapPin className="w-4 h-4" /> Live Tracking
               </button>
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
                 <Activity className="w-4 h-4" /> Health & Diagnostics
               </button>
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
                 <Battery className="w-4 h-4" /> Fuel & Efficiency
               </button>
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
                 <User className="w-4 h-4" /> Driver Info
               </button>
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-surface-elevated font-medium transition-colors">
                 <FileText className="w-4 h-4" /> Documents
               </button>
             </div>
@@ -113,12 +113,12 @@ export function ProductIntelligenceSection() {
 
             {/* Map Controls */}
             <div className="absolute bottom-4 left-4 flex flex-col bg-surface/90 backdrop-blur-md rounded-lg shadow-sm border border-border/40">
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="p-2 border-b border-border/40 hover:bg-surface-elevated text-foreground font-bold">+</button>
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} className="p-2 hover:bg-surface-elevated text-foreground font-bold">-</button>
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="p-2 border-b border-border/40 hover:bg-surface-elevated text-foreground font-bold">+</button>
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="p-2 hover:bg-surface-elevated text-foreground font-bold">-</button>
             </div>
 
             <div className="absolute bottom-4 right-4">
-              <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }} className="bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-foreground border border-border/40 hover:bg-surface-elevated">
+              <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-foreground border border-border/40 hover:bg-surface-elevated">
                 Terrain v
               </button>
             </div>
@@ -243,7 +243,7 @@ export function ProductIntelligenceSection() {
               <h3 className="text-base md:text-lg font-bold text-foreground">AI That Anticipates.</h3>
               <h3 className="text-base md:text-lg font-bold text-foreground">So You Stay Ahead.</h3>
             </div>
-            <Button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }} variant="outline" size="sm" className="whitespace-nowrap bg-background hover:bg-surface-elevated font-semibold text-xs border-border/60">
+            <Button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} variant="outline" size="sm" className="whitespace-nowrap bg-background hover:bg-surface-elevated font-semibold text-xs border-border/60">
               See How It Works <ArrowRight className="w-3 h-3 ml-1" />
             </Button>
           </div>

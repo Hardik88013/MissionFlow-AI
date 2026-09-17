@@ -27,10 +27,10 @@ export function FinalCTA() {
             Bring missions, vehicles, routes, resources, and operational intelligence into one connected decision environment.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-            <Button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Devraj"); }} size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-primary/20">
+            <Button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-primary/20">
               REQUEST DEMO <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
-            <Button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Aman"); }} variant="outline" size="lg" className="w-full sm:w-auto bg-background/50 backdrop-blur-sm">
+            <Button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} variant="outline" size="lg" className="w-full sm:w-auto bg-background/50 backdrop-blur-sm">
               EXPLORE PLATFORM
             </Button>
           </div>

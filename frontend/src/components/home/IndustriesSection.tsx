@@ -25,7 +25,7 @@ export function IndustriesSection() {
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed pr-4">
               From forward bases to disaster zones, MissionFlow AI turns data into decisions — ensuring critical supplies reach the right place, at the right time.
             </p>
-            <button onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Aman"); }} className="flex items-center gap-2 text-sm font-semibold text-foreground border border-border/60 hover:bg-surface-elevated shadow-sm px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+            <button onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard"; }} className="flex items-center gap-2 text-sm font-semibold text-foreground border border-border/60 hover:bg-surface-elevated shadow-sm px-5 py-2.5 rounded-lg transition-colors shadow-sm">
               Learn More <ArrowRight className="w-4 h-4" />
             </button>
           </div>
