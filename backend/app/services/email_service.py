@@ -5,17 +5,17 @@ from pydantic import EmailStr
 MAIL_USERNAME = os.getenv("MAIL_USERNAME", "dummy@example.com")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "dummy")
 MAIL_FROM = os.getenv("MAIL_FROM", "noreply@missionflow.ai")
-MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+MAIL_PORT = int(os.getenv("MAIL_PORT", 465))
 MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
 
 conf = ConnectionConfig(
     MAIL_USERNAME=MAIL_USERNAME,
     MAIL_PASSWORD=MAIL_PASSWORD,
     MAIL_FROM=MAIL_FROM,
-    MAIL_PORT=MAIL_PORT,
+    MAIL_PORT=465,
     MAIL_SERVER=MAIL_SERVER,
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
+    MAIL_STARTTLS=False,
+    MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True
 )
