@@ -10,5 +10,4 @@ ortools
 xgboost
 passlib[bcrypt]
 PyJWT
-google-auth
 fastapi-mail

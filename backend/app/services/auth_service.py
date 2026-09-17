@@ -3,15 +3,12 @@ import jwt
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
-from google.oauth2 import id_token
-from google.auth.transport import requests
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-missionflow-key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -43,9 +40,4 @@ def verify_reset_token(token: str):
     except jwt.PyJWTError:
         return None
 
-def verify_google_token(token: str):
-    try:
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
-        return idinfo
-    except ValueError:
-        return None
+

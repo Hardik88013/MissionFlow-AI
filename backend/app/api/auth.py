@@ -6,11 +6,11 @@ from bson import ObjectId
 from backend.app.db.mongodb import db
 from backend.app.models.user import (
     UserCreate, UserLogin, UserInDB, Token,
-    ForgotPassword, ResetPassword, GoogleAuth
+    ForgotPassword, ResetPassword, 
 )
 from backend.app.services.auth_service import (
     get_password_hash, verify_password, create_access_token,
-    ACCESS_TOKEN_EXPIRE_MINUTES, verify_google_token,
+    ACCESS_TOKEN_EXPIRE_MINUTES, 
     create_reset_token, verify_reset_token
 )
 from backend.app.services.email_service import send_reset_password_email
@@ -70,40 +70,7 @@ async def login(user: UserLogin):
         }
     }
 
-@router.post("/google", response_model=Token)
-async def google_auth(auth: GoogleAuth):
-    idinfo = verify_google_token(auth.credential)
-    if not idinfo:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
-        
-    email = idinfo.get("email").lower()
-    full_name = idinfo.get("name", "")
-    
-    db_user = await db.users.find_one({"email": email})
-    
-    if not db_user:
-        user_dict = {
-            "email": email,
-            "full_name": full_name,
-            "is_active": True,
-            "is_google_user": True
-        }
-        await db.users.insert_one(user_dict)
-        db_user = user_dict
-        
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": db_user["email"]}, expires_delta=access_token_expires
-    )
-    
-    return {
-        "access_token": access_token, 
-        "token_type": "bearer",
-        "user": {
-            "email": db_user["email"],
-            "full_name": db_user.get("full_name", "")
-        }
-    }
+
 
 @router.post("/forgot-password")
 async def forgot_password(req: ForgotPassword, background_tasks: BackgroundTasks):
