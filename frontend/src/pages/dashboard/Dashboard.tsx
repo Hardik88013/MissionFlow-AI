@@ -22,6 +22,7 @@ import {
   Users,
   Wrench,
   Zap,
+  LogOut
 } from "lucide-react";
 
 type VehicleStatus =
@@ -103,9 +104,10 @@ const routePoints = [
 ];
 
 export function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(
     initialVehicles[0],
   );
@@ -243,17 +245,38 @@ export function Dashboard() {
                 </span>
               </button>
 
-              <div className="hidden items-center gap-3 md:flex">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white uppercase">
-                  {user?.full_name ? user.full_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : 'OP'}
-                </div>
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="hidden items-center gap-3 md:flex hover:bg-slate-50 p-2 rounded-lg transition-colors"
+                >
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white uppercase">
+                    {user?.full_name ? user.full_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : 'OP'}
+                  </div>
 
-                <div>
-                  <p className="text-xs font-bold">{user?.full_name || 'Operator'}</p>
-                  <p className="text-[10px] text-slate-500">Fleet Manager</p>
-                </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold">{user?.full_name || 'Operator'}</p>
+                    <p className="text-[10px] text-slate-500">Fleet Manager</p>
+                  </div>
 
-                <ChevronRight className="h-4 w-4 rotate-90 text-slate-400" />
+                  <ChevronRight className={`h-4 w-4 text-slate-400 transition-transform ${isProfileOpen ? '-rotate-90' : 'rotate-90'}`} />
+                </button>
+
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-100 bg-white py-2 shadow-lg z-50">
+                    <div className="px-4 py-2 border-b border-slate-50 mb-2">
+                      <p className="text-xs text-slate-500">Signed in as</p>
+                      <p className="text-sm font-semibold truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={logout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
