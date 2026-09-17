@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { ArrowRight, Lock, Mail } from "lucide-react";
+import { ArrowRight, Lock, Mail, User } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
 
-export function Login() {
+export function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,16 +22,16 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, full_name: name })
       });
 
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.detail || "Login failed");
+        throw new Error(data.detail || "Registration failed");
       }
 
       login(data.access_token, data.user);
@@ -46,7 +47,6 @@ export function Login() {
     onSuccess: async (tokenResponse) => {
       try {
         setIsLoading(true);
-        // We will send the access_token to our backend
         const response = await fetch(`${API_URL}/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -70,18 +70,33 @@ export function Login() {
   });
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <img src="/logo.png" alt="MissionFlow AI" className="h-12 w-auto mx-auto mb-6" />
-          <h1 className="text-3xl font-bold tracking-tight">Mission Control</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Sign in to access MissionFlow AI operations.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Create Account</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Join MissionFlow AI operations.</p>
         </div>
 
         <div className="bg-surface border border-border/50 rounded-2xl p-6 shadow-xl">
           {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded text-red-500 text-sm text-center">{error}</div>}
           
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="John Doe"
+                  required
+                  className="w-full h-11 rounded-lg border border-border bg-background pl-10 pr-4 text-sm outline-none focus:border-primary transition-colors"
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold mb-2">Email</label>
               <div className="relative">
@@ -98,10 +113,7 @@ export function Login() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold">Password</label>
-                <Link to="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
-              </div>
+              <label className="block text-sm font-semibold mb-2">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
@@ -110,6 +122,7 @@ export function Login() {
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
                   required
+                  minLength={6}
                   className="w-full h-11 rounded-lg border border-border bg-background pl-10 pr-4 text-sm outline-none focus:border-primary transition-colors"
                 />
               </div>
@@ -120,14 +133,14 @@ export function Login() {
               disabled={isLoading}
               className="w-full h-11 rounded-lg bg-[#00A859] hover:bg-[#008f4c] text-white font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
             >
-              {isLoading ? "Authenticating..." : "Enter Mission Control"}
+              {isLoading ? "Creating Account..." : "Create Account"}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           <div className="mt-4 flex items-center justify-between">
             <span className="w-1/5 border-b border-border"></span>
-            <span className="text-xs text-center text-muted-foreground uppercase">or continue with</span>
+            <span className="text-xs text-center text-muted-foreground uppercase">or sign up with</span>
             <span className="w-1/5 border-b border-border"></span>
           </div>
 
@@ -147,12 +160,9 @@ export function Login() {
 
           <div className="mt-6 pt-5 border-t border-border/40 text-center flex flex-col gap-2">
             <div className="text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link to="/register" className="text-primary hover:underline font-semibold">Sign up</Link>
+              <span className="text-muted-foreground">Already have an account? </span>
+              <Link to="/login" className="text-primary hover:underline font-semibold">Sign in</Link>
             </div>
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-2">
-              ← Return to MissionFlow AI
-            </Link>
           </div>
         </div>
       </div>
