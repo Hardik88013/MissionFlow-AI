@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter
+from fastapi import APIRouter
 from typing import Dict, Any
 import os
 import pickle
@@ -6,7 +6,7 @@ import json
 import numpy as np
 import pandas as pd
 from datetime import datetime, timezone
-from app.db.mongodb import db
+from backend.app.db.mongodb import db
 
 router = APIRouter(prefix="/predictions/maintenance", tags=["predictions"])
 

@@ -1,6 +1,6 @@
-﻿from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict, Any
-from app.db.mongodb import get_db
+from backend.app.db.mongodb import get_db
 import datetime
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
