@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   Activity,
   ArrowRight,
@@ -102,6 +103,7 @@ const routePoints = [
 ];
 
 export function Dashboard() {
+  const { user } = useAuth();
   const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
   const [socketConnected, setSocketConnected] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(
@@ -242,12 +244,12 @@ export function Dashboard() {
               </button>
 
               <div className="hidden items-center gap-3 md:flex">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
-                  DM
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white uppercase">
+                  {user?.full_name ? user.full_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : 'OP'}
                 </div>
 
                 <div>
-                  <p className="text-xs font-bold">Devraj Menon</p>
+                  <p className="text-xs font-bold">{user?.full_name || 'Operator'}</p>
                   <p className="text-[10px] text-slate-500">Fleet Manager</p>
                 </div>
 
