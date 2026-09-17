@@ -46,7 +46,7 @@ type WebSocketMessage = {
   vehicle?: Vehicle;
 };
 
-const WS_URL = "ws://127.0.0.1:8000/ws/fleet";
+const WS_URL = `${import.meta.env.VITE_WS_URL || "ws://127.0.0.1:8000"}/ws/fleet`;
 
 const initialVehicles: Vehicle[] = [
   {
