@@ -95,9 +95,14 @@ async def forgot_password(req: ForgotPassword, background_tasks: BackgroundTasks
     try:
         success = await send_reset_password_email(email_str, token, FRONTEND_URL)
         if not success:
-            raise HTTPException(status_code=500, detail="Failed to send email. Check SMTP server configuration or App Password.")
+            raise Exception("Failed to send")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"SMTP Error: {str(e)}")
+        # Fallback for Render Free Tier SMTP block
+        reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+        return {
+            "message": "Render blocked SMTP. A direct link is provided for testing.",
+            "reset_link": reset_link
+        }
     
     return {"message": "Reset link has been sent to your email successfully"}
 

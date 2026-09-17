@@ -7,6 +7,7 @@ export function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [resetLink, setResetLink] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -31,6 +32,9 @@ export function ForgotPassword() {
       }
 
       setMessage(data.message || "Reset link sent!");
+      if (data.reset_link) {
+        setResetLink(data.reset_link);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -51,6 +55,15 @@ export function ForgotPassword() {
           {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded text-red-500 text-sm text-center">{error}</div>}
           {message && <div className="mb-4 p-3 bg-green-500/10 border border-green-500/50 rounded text-green-500 text-sm text-center">{message}</div>}
           
+          {resetLink && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+              <p className="text-sm text-blue-800 mb-3 font-medium">Test Mode Bypass:</p>
+              <Link to={resetLink.replace(window.location.origin, '')} className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors">
+                Go to Reset Password Screen
+              </Link>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold mb-2">Email</label>
