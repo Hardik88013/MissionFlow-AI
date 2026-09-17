@@ -51,14 +51,15 @@ export function Login() {
           alt="MissionFlow Operations" 
           className="absolute inset-0 w-full h-full object-cover opacity-50"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
         
         {/* Big Logo in center of left side */}
-        <div className="relative z-10 flex flex-col items-center justify-center p-12 text-center">
-          <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-sm border border-white/20 mb-8 shadow-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center p-12 text-center w-full max-w-xl">
+          {/* Solid white background for the logo because it has dark text */}
+          <div className="bg-white px-10 py-8 rounded-3xl shadow-2xl mb-10 transform hover:scale-105 transition-transform duration-300">
             <img src="/logo.png" alt="MissionFlow AI" className="h-40 w-auto" />
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-xl tracking-tight">Smarter Operations.<br/>A Stronger India.</h2>
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-xl tracking-tight leading-tight">Smarter Operations.<br/>A Stronger India.</h2>
           <p className="text-lg lg:text-xl text-gray-200 max-w-lg drop-shadow-md">Predictive insights, real-time tracking, and intelligent routing for mission-critical logistics.</p>
         </div>
       </div>
