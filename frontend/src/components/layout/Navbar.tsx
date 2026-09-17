@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Container } from "../ui/Container";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
@@ -13,7 +13,9 @@ export function Navbar() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
+
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -26,16 +28,22 @@ export function Navbar() {
   ];
 
   return (
-    <header 
+    <header
       className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        scrolled ? "bg-background backdrop-blur-md shadow-sm border-b border-border/40" : "bg-background border-b border-transparent"
+        scrolled
+          ? "bg-background backdrop-blur-md shadow-sm border-b border-border/40"
+          : "bg-background border-b border-transparent"
       }`}
     >
       <Container>
         <div className="flex h-20 items-center justify-between">
           {/* LEFT: Logo */}
           <div className="flex items-center shrink-0">
-            <img src="/logo.png" alt="MissionFlow AI Logo" className="h-10 md:h-12 w-auto" />
+            <img
+              src="/logo.png"
+              alt="MissionFlow AI Logo"
+              className="h-10 md:h-12 w-auto"
+            />
           </div>
 
           {/* CENTER: Desktop Navigation */}
@@ -45,10 +53,14 @@ export function Navbar() {
                 key={link.label}
                 href={link.href}
                 className={`relative h-full flex items-center text-sm font-semibold transition-colors ${
-                  link.active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  link.active
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
+                onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
               >
                 {link.label}
+
                 {link.active && (
                   <span className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full" />
                 )}
@@ -58,27 +70,48 @@ export function Navbar() {
 
           {/* RIGHT: Desktop Actions */}
           <div className="hidden lg:flex items-center gap-6 shrink-0">
-            <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Search">
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Search"
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
+            >
               <Search className="w-5 h-5" />
             </button>
+
             <ThemeToggle />
-            <a href="#signin" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+
+            {/* SIGN IN */}
+            <a
+              href="/login"
+              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
+            >
               Sign In
             </a>
-            <Button className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10">
-              Request Demo <ArrowRight className="w-4 h-4 ml-1.5" />
+
+            <Button 
+              className="bg-[#00A859] hover:bg-[#008f4c] text-white shadow-md shadow-green-500/20 rounded-md font-bold px-5 h-10"
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Aman"); }}
+            >
+              Request Demo
+              <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </div>
 
           {/* MOBILE: Actions */}
           <div className="flex items-center gap-2 lg:hidden">
             <ThemeToggle />
+
             <IconButton
               variant="ghost"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </IconButton>
           </div>
         </div>
@@ -93,20 +126,33 @@ export function Navbar() {
                 key={link.label}
                 href={link.href}
                 className={`text-base font-medium transition-colors ${
-                  link.active ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"
+                  link.active
+                    ? "text-primary font-bold"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
               >
                 {link.label}
               </a>
             ))}
           </nav>
+
           <div className="pt-4 border-t border-border/40 flex flex-col gap-3">
             <ThemeToggle />
-            <a href="#signin" className="text-base font-medium text-foreground text-center py-2">
+
+            {/* MOBILE SIGN IN */}
+            <a
+              href="/login"
+              className="text-base font-medium text-foreground text-center py-2"
+              onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); alert("🚧 Module in Development\n\nThis feature is currently being built by: Hardik"); }}
+            >
               Sign In
             </a>
-            <Button className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold">
+
+            <Button 
+              className="w-full bg-[#00A859] hover:bg-[#008f4c] text-white rounded-md font-bold"
+              onClick={(e) => { e.preventDefault(); alert("🚧 Module in Development\n\nThis feature is currently being built by: Aman"); }}
+            >
               Request Demo
             </Button>
           </div>
@@ -115,6 +161,3 @@ export function Navbar() {
     </header>
   );
 }
-
-
-
