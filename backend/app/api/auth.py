@@ -85,11 +85,14 @@ async def login(user: UserLogin):
 async def forgot_password(req: ForgotPassword, background_tasks: BackgroundTasks):
     email_str = str(req.email).lower()
     db_user = await db.users.find_one({"email": email_str})
-    if db_user:
-        token = create_reset_token(email_str)
-        background_tasks.add_task(send_reset_password_email, email_str, token, FRONTEND_URL)
     
-    return {"message": "If that email is in our system, a reset link has been sent."}
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found with this email address")
+        
+    token = create_reset_token(email_str)
+    background_tasks.add_task(send_reset_password_email, email_str, token, FRONTEND_URL)
+    
+    return {"message": "Reset link has been sent to your email successfully"}
 
 @router.post("/reset-password")
 async def reset_password(req: ResetPassword):
