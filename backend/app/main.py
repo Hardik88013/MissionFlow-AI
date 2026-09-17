@@ -18,6 +18,11 @@ from backend.app.websocket.fleet_tracking import (
 )
 
 
+
+from fastapi import Request, status
+from fastapi.responses import JSONResponse
+import traceback
+
 app = FastAPI(
     title="MissionFlow AI API",
     description="Mission-critical logistics API",
@@ -43,6 +48,15 @@ app.add_middleware(
 
 app.include_router(eta_router)
 app.include_router(routes_router)
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    print("GLOBAL ERROR:", exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": str(exc), "traceback": traceback.format_exc()}
+    )
+
 app.include_router(fleet_tracking_router)
 app.include_router(auth_router)
 
