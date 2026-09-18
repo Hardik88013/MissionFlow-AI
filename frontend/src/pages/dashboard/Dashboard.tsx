@@ -1,3 +1,4 @@
+﻿import AstraAI from "../../components/astra/AstraAI";
 import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
@@ -815,6 +816,12 @@ export function Dashboard() {
           </section>
 
           {/* ========================================================= */}
+          {/* ASTRA AI */}
+          <section className="mt-4">
+  <AstraAI />
+</section>
+
+
           {/* PLATFORM FEATURES */}
           {/* ========================================================= */}
 
@@ -1309,6 +1316,4 @@ function LegendRow({
     </div>
   );
 }
-
-
 

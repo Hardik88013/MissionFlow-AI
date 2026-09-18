@@ -1,488 +1,856 @@
-﻿import { useState } from "react";
-import type { FormEvent } from "react";
+﻿import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
+
+import "./AstraAI.css";
+
 import {
-  Activity,
-  Bot,
-  BrainCircuit,
-  CheckCircle2,
-  Clock3,
-  MapPinned,
-  Route,
-  Send,
-  Sparkles,
-  Truck,
-  Zap,
-} from "lucide-react";
+  askAstra,
+  type AstraHistoryMessage,
+} from "../../services/astraService";
 
-type AstraResponse = {
+type AstraAIProps = {
+  onClose?: () => void;
+};
+
+type ChatMessage = {
+  role: "user" | "astra";
   message: string;
-  tool?: string | null;
-  data?: Record<string, unknown> | null;
 };
 
-const API_URL = "http://127.0.0.1:8000/ai/astra/chat";
+type AstraState =
+  | "open"
+  | "closing"
+  | "closed"
+  | "opening";
 
-type ToolCardProps = {
-  response: AstraResponse | null;
-};
+export default function AstraAI({
+  onClose,
+}: AstraAIProps) {
 
-function ToolResultCard({ response }: ToolCardProps) {
-  if (!response?.tool || !response.data) {
-    return null;
-  }
+  const [state, setState] =
+    useState<AstraState>("open");
 
-  const data = response.data;
+  const [
+    showGreeting,
+    setShowGreeting,
+  ] = useState(false);
 
-  if (response.tool === "predict_delivery_eta") {
-    const eta = Number(data.predicted_eta_minutes ?? 0);
+  const [
+    showDescription,
+    setShowDescription,
+  ] = useState(false);
 
-    return (
-      <div className="mt-3 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.05] p-3">
-        <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">
-          <Clock3 size={13} />
-          ETA Prediction
-        </div>
+  const [
+    showInput,
+    setShowInput,
+  ] = useState(false);
 
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="text-2xl font-semibold text-white">
-              {eta.toFixed(1)}
-              <span className="ml-1 text-sm font-normal text-slate-400">
-                min
-              </span>
-            </div>
+  const [
+    input,
+    setInput,
+  ] = useState("");
 
-            <div className="mt-1 text-[10px] text-slate-500">
-              AI-powered delivery estimate
-            </div>
-          </div>
+  const [
+    messages,
+    setMessages,
+  ] = useState<ChatMessage[]>([]);
 
-          <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/10 p-2 text-cyan-300">
-            <Zap size={18} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  if (response.tool === "optimize_routes") {
-    const totalDistance =
-      Number(data.total_distance_meters ?? 0) / 1000;
+  const inputRef =
+    useRef<HTMLInputElement>(null);
 
-    const routes = Array.isArray(data.routes)
-      ? data.routes
-      : [];
+  const messagesRef =
+    useRef<HTMLDivElement>(null);
 
-    return (
-      <div className="mt-3 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.05] p-3">
-        <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
-          <Route size={13} />
-          Route Optimization
-        </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg border border-white/5 bg-black/20 p-2">
-            <div className="text-[9px] uppercase tracking-wider text-slate-500">
-              Total Distance
-            </div>
+  /* =====================================================
+     OPEN INTRO ANIMATION
+     ===================================================== */
 
-            <div className="mt-1 text-lg font-semibold text-white">
-              {totalDistance.toFixed(2)}
-              <span className="ml-1 text-xs text-slate-400">
-                km
-              </span>
-            </div>
-          </div>
+  useEffect(() => {
 
-          <div className="rounded-lg border border-white/5 bg-black/20 p-2">
-            <div className="text-[9px] uppercase tracking-wider text-slate-500">
-              Routes
-            </div>
-
-            <div className="mt-1 text-lg font-semibold text-white">
-              {routes.length}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-3 space-y-1.5">
-          {routes.map((route, index) => {
-            const item = route as Record<string, unknown>;
-
-            const vehicleId = item.vehicle_id;
-
-            const distance =
-              Number(item.distance_meters ?? 0) / 1000;
-
-            return (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-lg border border-white/5 bg-black/10 px-2.5 py-2 text-[10px]"
-              >
-                <span className="flex items-center gap-2 text-slate-300">
-                  <Truck size={12} />
-                  Vehicle {String(vehicleId)}
-                </span>
-
-                <span className="text-emerald-300">
-                  {distance.toFixed(2)} km
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  if (response.tool === "get_operations_summary") {
-    return (
-      <div className="mt-3 rounded-xl border border-violet-400/20 bg-violet-400/[0.05] p-3">
-        <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-300">
-          <Activity size={13} />
-          Operations Snapshot
-        </div>
-
-        <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-lg border border-white/5 bg-black/20 p-2 text-center">
-            <div className="text-lg font-semibold text-white">
-              {String(data.vehicle_count ?? 0)}
-            </div>
-
-            <div className="text-[8px] uppercase tracking-wider text-slate-500">
-              Vehicles
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-white/5 bg-black/20 p-2 text-center">
-            <div className="text-lg font-semibold text-emerald-300">
-              {String(data.active_vehicle_count ?? 0)}
-            </div>
-
-            <div className="text-[8px] uppercase tracking-wider text-slate-500">
-              Active
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-white/5 bg-black/20 p-2 text-center">
-            <div className="text-lg font-semibold text-cyan-300">
-              {String(data.active_delivery_count ?? 0)}
-            </div>
-
-            <div className="text-[8px] uppercase tracking-wider text-slate-500">
-              Deliveries
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
-
-export default function AstraAI() {
-  const [message, setMessage] = useState("");
-
-  const [reply, setReply] = useState(
-    "Mission intelligence online. I can analyze ETA, routes, fleet activity, and operational status."
-  );
-
-  const [lastResponse, setLastResponse] =
-    useState<AstraResponse | null>(null);
-
-  const [loading, setLoading] = useState(false);
-
-  async function sendMessage(
-    event?: FormEvent,
-    presetMessage?: string
-  ) {
-    event?.preventDefault();
-
-    const text = (presetMessage ?? message).trim();
-
-    if (!text || loading) {
+    if (
+      state !== "open" &&
+      state !== "opening"
+    ) {
       return;
     }
 
-    setLoading(true);
+    const greetingTimer =
+      window.setTimeout(() => {
+        setShowGreeting(true);
+      }, 320);
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: text,
-        }),
-      });
+    const descriptionTimer =
+      window.setTimeout(() => {
+        setShowDescription(true);
+      }, 580);
 
-      if (!response.ok) {
-        throw new Error(
-          `Astra API returned ${response.status}`
-        );
-      }
+    const inputTimer =
+      window.setTimeout(() => {
+        setShowInput(true);
+      }, 850);
 
-      const data: AstraResponse = await response.json();
-
-      setReply(data.message);
-      setLastResponse(data);
-      setMessage("");
-    } catch {
-      setReply(
-        "Astra could not reach the MissionFlow intelligence service. Verify that the backend is running."
+    return () => {
+      window.clearTimeout(
+        greetingTimer
       );
 
-      setLastResponse(null);
-    } finally {
-      setLoading(false);
+      window.clearTimeout(
+        descriptionTimer
+      );
+
+      window.clearTimeout(
+        inputTimer
+      );
+    };
+
+  }, [state]);
+
+
+  /* =====================================================
+     AUTO SCROLL
+     ===================================================== */
+
+  useEffect(() => {
+
+    if (messagesRef.current) {
+
+      messagesRef.current.scrollTop =
+        messagesRef.current.scrollHeight;
+
     }
-  }
+
+  }, [messages, loading]);
+
+
+  /* =====================================================
+     OPEN ASTRA
+     ===================================================== */
+
+  const openAstra = () => {
+
+    if (state !== "closed") {
+      return;
+    }
+
+    setState("opening");
+
+    setShowGreeting(false);
+    setShowDescription(false);
+    setShowInput(false);
+
+    window.setTimeout(() => {
+
+      setState("open");
+
+      window.setTimeout(() => {
+        inputRef.current?.focus();
+      }, 150);
+
+    }, 40);
+  };
+
+
+  /* =====================================================
+     CLOSE ASTRA
+
+     IMPORTANT:
+     The component is NOT unmounted.
+     CSS gets the full closing animation.
+     ===================================================== */
+
+  const closeAstra = () => {
+
+    if (state !== "open") {
+      return;
+    }
+
+    if (loading) {
+      return;
+    }
+
+    setState("closing");
+
+    setShowGreeting(false);
+    setShowDescription(false);
+    setShowInput(false);
+
+    window.setTimeout(() => {
+
+      setState("closed");
+
+      if (onClose) {
+        onClose();
+      }
+
+    }, 900);
+  };
+
+
+  /* =====================================================
+     SEND MESSAGE TO LOCAL ASTRA BACKEND
+     ===================================================== */
+
+  const sendMessage = async () => {
+
+    const message =
+      input.trim();
+
+    if (
+      !message ||
+      loading ||
+      state !== "open"
+    ) {
+      return;
+    }
+
+
+    /* -----------------------------------------------
+       USER MESSAGE APPEARS IMMEDIATELY
+       ----------------------------------------------- */
+
+    setMessages(
+      (previous) => [
+        ...previous,
+
+        {
+          role: "user",
+          message,
+        },
+      ]
+    );
+
+
+    /* -----------------------------------------------
+       CLEAR INPUT IMMEDIATELY
+       ----------------------------------------------- */
+
+    setInput("");
+
+    /* -----------------------------------------------
+       ACTIVATE SWORD / THINKING ANIMATION
+       ----------------------------------------------- */
+
+    setLoading(true);
+
+
+    try {
+
+      /*
+       * Send the current conversation context to the local Astra backend so Astra
+       * understands the current conversation context.
+       *
+       * We intentionally limit the history so the popup
+       * stays lightweight and requests remain compact.
+       */
+
+      const recentMessages =
+        messages.slice(-10);
+
+      const history:
+        AstraHistoryMessage[] =
+        recentMessages.map(
+          (item) => ({
+            role: item.role,
+            message: item.message,
+          })
+        );
+
+
+      /* ---------------------------------------------
+         REAL LOCAL ASTRA API CALL
+         --------------------------------------------- */
+
+      const response =
+        await askAstra(
+          message,
+          history
+        );
+
+
+      /* ---------------------------------------------
+         Tiny delay keeps the energy animation visible
+         instead of flashing for a few milliseconds.
+         --------------------------------------------- */
+
+      await new Promise<void>(
+        (resolve) => {
+
+          window.setTimeout(
+            resolve,
+            300
+          );
+
+        }
+      );
+
+
+      /* ---------------------------------------------
+         ASTRA RESPONSE
+         --------------------------------------------- */
+
+      setMessages(
+        (previous) => [
+          ...previous,
+
+          {
+            role: "astra",
+            message: response,
+          },
+        ]
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Astra local backend error:",
+        error
+      );
+
+
+      let errorMessage =
+        "Mission link interrupted. Please make sure the local Astra backend is running.";
+
+
+      if (
+        error instanceof Error &&
+        error.message ===
+          "ASTRA_LOCAL_BACKEND_UNAVAILABLE"
+      ) {
+
+        errorMessage =
+          "Mission link interrupted. Please start the MissionFlow FastAPI backend on port 8000.";
+
+      }
+
+
+      setMessages(
+        (previous) => [
+          ...previous,
+
+          {
+            role: "astra",
+            message: errorMessage,
+          },
+        ]
+      );
+
+    } finally {
+
+      setLoading(false);
+
+      window.setTimeout(() => {
+
+        inputRef.current?.focus();
+
+      }, 100);
+
+    }
+  };
+
+
+  /* =====================================================
+     ENTER KEY
+     ===================================================== */
+
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLInputElement>
+  ) => {
+
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
+
+      event.preventDefault();
+
+      void sendMessage();
+    }
+  };
+
+
+  /* =====================================================
+     RENDER
+     ===================================================== */
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-cyan-400/15 bg-[#081321]/90 shadow-[0_0_35px_rgba(34,211,238,0.06)]">
 
-      <div className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-cyan-400/10 blur-3xl" />
+    <div
+      className={
+        `astra-system astra-state-${state}`
+      }
+    >
 
-      <div className="pointer-events-none absolute -bottom-20 -right-16 h-44 w-44 rounded-full bg-emerald-400/5 blur-3xl" />
 
-      <div className="relative p-5">
+      {/* =================================================
+          PERSISTENT HOLOGRAPHIC SWORD
+          NEVER UNMOUNTED
+          ================================================= */}
 
-        {/* HEADER */}
+      <div
+        className="astra-hologram"
+        aria-hidden="true"
+      >
 
-        <div className="mb-5 flex items-start justify-between">
+        <div
+          className="astra-energy aura-one"
+        />
 
-          <div className="flex items-center gap-3">
+        <div
+          className="astra-energy aura-two"
+        />
 
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-400/10">
+        <div
+          className="astra-beam beam-one"
+        />
 
-              <BrainCircuit
-                size={23}
-                className="text-cyan-300"
+        <div
+          className="astra-beam beam-two"
+        />
+
+        <div
+          className="astra-ring ring-one"
+        />
+
+        <div
+          className="astra-ring ring-two"
+        />
+
+
+        <div className="astra-logo-wrapper">
+
+          <div className="astra-logo-glow" />
+
+          <div className="astra-symbol">
+
+            <div
+              className="astra-symbol-top"
+            />
+
+            <div
+              className="astra-symbol-body"
+            >
+              <div
+                className="astra-symbol-core"
               />
-
-              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-[#081321] bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-
             </div>
 
-            <div>
-
-              <div className="flex items-center gap-2">
-
-                <h2 className="text-sm font-semibold tracking-[0.16em] text-white">
-                  ASTRA
-                </h2>
-
-                <Sparkles
-                  size={13}
-                  className="text-cyan-300"
-                />
-
-              </div>
-
-              <p className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-slate-500">
-                Mission Intelligence Partner
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="flex items-center gap-1.5 rounded-full border border-emerald-400/15 bg-emerald-400/5 px-2.5 py-1">
-
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-
-            <span className="text-[8px] font-semibold tracking-[0.14em] text-emerald-300">
-              ONLINE
-            </span>
+            <div
+              className="astra-symbol-bottom"
+            />
 
           </div>
 
         </div>
 
-        {/* STATUS */}
 
-        <div className="mb-3 flex items-center gap-2 text-[9px] uppercase tracking-[0.16em] text-slate-500">
-
-          <Bot
-            size={12}
-            className="text-cyan-300"
-          />
-
-          Intelligence Core
-
-          <span className="text-slate-700">
-            •
-          </span>
-
-          Live Mission Context
-
-        </div>
-
-        {/* RESPONSE */}
-
-        <div className="rounded-xl border border-cyan-300/10 bg-[#0b1929]/90 p-3.5">
-
-          <div className="flex gap-2.5">
-
-            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-cyan-400/10">
-
-              <Bot
-                size={13}
-                className="text-cyan-300"
-              />
-
-            </div>
-
-            <div className="min-w-0">
-
-              <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-cyan-300">
-                Astra
-              </div>
-
-              <p className="text-xs leading-5 text-slate-300">
-
-                {loading ? (
-                  <span className="flex items-center gap-2 text-slate-400">
-
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300" />
-
-                    Analyzing mission data...
-
-                  </span>
-                ) : (
-                  reply
-                )}
-
-              </p>
-
-            </div>
-
-          </div>
-
-          <ToolResultCard response={lastResponse} />
-
-        </div>
-
-        {/* QUICK COMMANDS */}
-
-        <div className="mt-4">
-
-          <div className="mb-2 text-[8px] font-semibold uppercase tracking-[0.18em] text-slate-600">
-            Quick Command
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-
-            <button
-              type="button"
-              onClick={() =>
-                sendMessage(
-                  undefined,
-                  "Predict the ETA"
-                )
-              }
-              disabled={loading}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-white/7 bg-white/[0.025] px-2 py-2.5 text-[9px] font-medium text-slate-400 transition hover:border-cyan-300/20 hover:bg-cyan-300/5 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Clock3 size={12} />
-              ETA
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                sendMessage(
-                  undefined,
-                  "Optimize the routes"
-                )
-              }
-              disabled={loading}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-white/7 bg-white/[0.025] px-2 py-2.5 text-[9px] font-medium text-slate-400 transition hover:border-emerald-300/20 hover:bg-emerald-300/5 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Route size={12} />
-              Routes
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                sendMessage(
-                  undefined,
-                  "Show fleet status"
-                )
-              }
-              disabled={loading}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-white/7 bg-white/[0.025] px-2 py-2.5 text-[9px] font-medium text-slate-400 transition hover:border-violet-300/20 hover:bg-violet-300/5 hover:text-violet-200 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Truck size={12} />
-              Fleet
-            </button>
-
-          </div>
-
-        </div>
-
-        {/* INPUT */}
-
-        <form
-          onSubmit={sendMessage}
-          className="mt-4"
+        <div
+          className="astra-spark sparkle-one"
         >
+          ?
+        </div>
 
-          <div className="flex items-center rounded-xl border border-white/10 bg-black/20 p-1.5 transition focus-within:border-cyan-300/25">
+        <div
+          className="astra-spark sparkle-two"
+        >
+          ?
+        </div>
 
-            <MapPinned
-              size={14}
-              className="ml-2 text-slate-600"
-            />
-
-            <input
-              value={message}
-              onChange={(event) =>
-                setMessage(event.target.value)
-              }
-              placeholder="Ask Astra..."
-              disabled={loading}
-              className="min-w-0 flex-1 bg-transparent px-2.5 py-2 text-[11px] text-slate-200 outline-none placeholder:text-slate-600"
-            />
-
-            <button
-              type="submit"
-              disabled={
-                loading || !message.trim()
-              }
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400/10 text-cyan-300 transition hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-30"
-              aria-label="Send command"
-            >
-              <Send size={14} />
-            </button>
-
-          </div>
-
-        </form>
-
-        {/* FOOTER */}
-
-        <div className="mt-3 flex items-center justify-between text-[8px] uppercase tracking-[0.14em] text-slate-700">
-
-          <span>
-            AI Operations Core
-          </span>
-
-          <span className="flex items-center gap-1.5">
-
-            <CheckCircle2 size={10} />
-
-            Mission Ready
-
-          </span>
-
+        <div
+          className="astra-spark sparkle-three"
+        >
+          ?
         </div>
 
       </div>
 
-    </section>
+
+      {/* =================================================
+          THINKING ENERGY
+          ================================================= */}
+
+      {loading && (
+
+        <div className="astra-thinking-aura">
+
+          <div
+            className="thinking-wave wave-one"
+          />
+
+          <div
+            className="thinking-wave wave-two"
+          />
+
+          <div
+            className="thinking-wave wave-three"
+          />
+
+        </div>
+
+      )}
+
+
+      {/* =================================================
+          CHAT CARD
+          ALWAYS MOUNTED
+          ================================================= */}
+
+      <section className="astra-card">
+
+        <div className="astra-card-shine" />
+
+
+        <button
+          className="astra-close"
+          onClick={closeAstra}
+          disabled={loading}
+          aria-label="Collapse Astra AI"
+        >
+          ×
+        </button>
+
+
+        <div className="astra-card-content">
+
+
+          {/* ---------------------------------------------
+             STATUS
+             --------------------------------------------- */}
+
+          <div className="astra-status">
+
+            <span
+              className="astra-status-dot"
+            />
+
+            ASTRA AI ONLINE
+
+          </div>
+
+
+          {/* ---------------------------------------------
+             INITIAL GREETING
+             --------------------------------------------- */}
+
+          {showGreeting &&
+            messages.length === 0 && (
+
+            <div className="astra-greeting">
+
+              Hey Devraj, I’m Astra AI
+
+              <span>
+                ?
+              </span>
+
+            </div>
+
+          )}
+
+
+          {showDescription &&
+            messages.length === 0 && (
+
+            <div className="astra-description">
+
+              <div>
+                Your intelligent mission
+                co-pilot.
+              </div>
+
+              <div>
+                How may I help you today?
+              </div>
+
+            </div>
+
+          )}
+
+
+          {/* ---------------------------------------------
+             CHAT HISTORY
+             --------------------------------------------- */}
+
+          {messages.length > 0 && (
+
+            <div
+              className="astra-chat-messages"
+              ref={messagesRef}
+            >
+
+              {messages.map(
+                (item, index) => (
+
+                <div
+                  key={
+                    `${item.role}-${index}`
+                  }
+                  className={[
+                    "astra-chat-message",
+
+                    item.role === "user"
+                      ? "astra-user-message"
+                      : "astra-response-message",
+
+                  ].join(" ")}
+                >
+
+                  <div
+                    className="astra-message-label"
+                  >
+                    {item.role === "user"
+                      ? "YOU"
+                      : "ASTRA"}
+                  </div>
+
+
+                  <div
+                    className="astra-message-text"
+                  >
+                    {item.message}
+                  </div>
+
+                </div>
+
+              ))}
+
+
+              {/* -----------------------------------------
+                 THINKING INDICATOR
+                 ----------------------------------------- */}
+
+              {loading && (
+
+                <div
+                  className="
+                    astra-chat-message
+                    astra-response-message
+                  "
+                >
+
+                  <div
+                    className="astra-message-label"
+                  >
+                    ASTRA
+                  </div>
+
+
+                  <div
+                    className="astra-thinking"
+                  >
+
+                    <div
+                      className="
+                        astra-thinking-glyphs
+                      "
+                    >
+
+                      <span />
+                      <span />
+                      <span />
+
+                    </div>
+
+
+                    <em>
+                      Astra is thinking...
+                    </em>
+
+                  </div>
+
+                </div>
+
+              )}
+
+            </div>
+
+          )}
+
+
+          {/* ---------------------------------------------
+             INPUT
+             --------------------------------------------- */}
+
+          {showInput && (
+
+            <div
+              className="astra-input-wrapper"
+            >
+
+              <input
+                ref={inputRef}
+
+                className="astra-input"
+
+                value={input}
+
+                onChange={(event) => {
+                  setInput(
+                    event.target.value
+                  );
+                }}
+
+                onKeyDown={handleKeyDown}
+
+                placeholder={
+                  loading
+                    ? "Astra is thinking..."
+                    : "Ask Astra anything..."
+                }
+
+                disabled={loading}
+
+                maxLength={2000}
+
+                autoComplete="off"
+              />
+
+
+              <button
+                className="astra-send"
+
+                onClick={() => {
+                  void sendMessage();
+                }}
+
+                disabled={
+                  loading ||
+                  !input.trim()
+                }
+              >
+
+                {loading
+                  ? "..."
+                  : "Send"}
+
+              </button>
+
+            </div>
+
+          )}
+
+        </div>
+
+
+        {/* ---------------------------------------------
+           GLASS CARD CORNERS
+           --------------------------------------------- */}
+
+        <div
+          className="
+            astra-card-corner
+            corner-tl
+          "
+        />
+
+        <div
+          className="
+            astra-card-corner
+            corner-tr
+          "
+        />
+
+        <div
+          className="
+            astra-card-corner
+            corner-bl
+          "
+        />
+
+        <div
+          className="
+            astra-card-corner
+            corner-br
+          "
+        />
+
+      </section>
+
+
+      {/* =================================================
+          BOTTOM-RIGHT FLOATING SWORD
+          ================================================= */}
+
+      <button
+        className="astra-floating-trigger"
+
+        onClick={openAstra}
+
+        aria-label="Open Astra AI"
+      >
+
+        <span
+          className="astra-trigger-burst"
+        />
+
+        <span
+          className="
+            astra-trigger-ring
+            ring-a
+          "
+        />
+
+        <span
+          className="
+            astra-trigger-ring
+            ring-b
+          "
+        />
+
+
+        <span
+          className="astra-trigger-sword"
+        >
+
+          <span
+            className="trigger-sword-glow"
+          />
+
+          <span
+            className="trigger-sword-top"
+          />
+
+          <span
+            className="trigger-sword-body"
+          >
+
+            <span
+              className="trigger-sword-core"
+            />
+
+          </span>
+
+          <span
+            className="trigger-sword-bottom"
+          />
+
+        </span>
+
+
+        <span
+          className="astra-trigger-status"
+        >
+
+          <span />
+
+          ASTRA
+
+        </span>
+
+      </button>
+
+    </div>
   );
 }
+
+
+
