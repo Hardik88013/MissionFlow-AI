@@ -15,3 +15,27 @@ ml/data/**/*.zip
 
 # ML temporary files
 ml/artifacts/**/*.tmp
+# Local environment
+frontend/.env
+frontend/.env.backup
+
+# Runtime logs
+backend/uvicorn_stdout.log
+backend/uvicorn_stderr.log
+
+# Astra backups / temporary files
+backend/app/ai/astra/*.backup.py
+frontend/src/components/AstraAI.tsx.old-duplicate.bak
+frontend/src/components/astra/*.bak
+frontend/src/components/astra/*.backup.tsx
+frontend/src/components/AstraWelcomePopup.tsx
+
+# Old Dashboard backups
+frontend/src/pages/dashboard/Dashboard.backup.tsx
+frontend/src/pages/dashboard/Dashboard.before-astra-popup.tsx
+
+# Encoding backups
+frontend/src.encoding-backup/
+
+# Local Astra assets
+frontend/public/astra-sword.png
