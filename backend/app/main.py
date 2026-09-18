@@ -4,7 +4,7 @@ FastAPI Application
 """
 
 import asyncio
-
+from backend.app.ai.api.astra import router as astra_router
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -43,7 +43,7 @@ app.add_middleware(
 app.include_router(eta_router)
 app.include_router(routes_router)
 app.include_router(fleet_tracking_router)
-
+app.include_router(astra_router)
 
 @app.websocket("/ws/fleet")
 async def fleet_tracking_endpoint(websocket: WebSocket):
