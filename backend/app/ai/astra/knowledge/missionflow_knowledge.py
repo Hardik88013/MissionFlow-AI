@@ -1,5 +1,5 @@
 ﻿MISSIONFLOW_KNOWLEDGE = {
-    "identity": {
+    "product": {
         "name": "MissionFlow AI",
         "description": (
             "MissionFlow AI is an AI-powered mission-critical logistics "
@@ -11,6 +11,25 @@
             "predict arrival times, optimize routes, respond to disruptions, and make "
             "data-driven operational decisions."
         ),
+        "tagline": "Mission Ready. Always Ahead.",
+    },
+
+    "astra": {
+        "name": "Astra AI",
+        "creator": "Devraj Menon K",
+        "role": (
+            "MissionFlow's operations intelligence copilot. Astra interprets "
+            "questions, retrieves operational data, invokes ETA and routing "
+            "capabilities, and synthesizes concise operational briefings."
+        ),
+        "capabilities": [
+            "Live fleet position and status queries",
+            "Vehicle location and ETA information",
+            "Route and stop tracking",
+            "Operational briefings and alerts",
+            "Mission context understanding",
+            "Quick operational answers",
+        ],
     },
 
     "features": [
@@ -37,18 +56,32 @@
         "Machine Learning",
     ],
 
-    "team": {
-        "founders": [],
-        "developers": [],
+    "dashboard": {
+        "sections": [
+            "Live Mission Network Map",
+            "Active Vehicles Panel",
+            "Vehicle Details",
+            "KPI Cards",
+            "AI Insights",
+            "Recent Alerts",
+            "Analytics",
+        ],
     },
 
-    "astra": {
-        "name": "Astra AI",
-        "role": (
-            "MissionFlow's operations intelligence copilot. Astra interprets "
-            "questions, retrieves operational data, invokes ETA and routing "
-            "capabilities, and synthesizes concise operational briefings."
-        ),
+    "fleet": {
+        "vehicles": [
+            {"id": 101, "name": "TRK-01"},
+            {"id": 102, "name": "TRK-02"},
+            {"id": 103, "name": "TRK-03"},
+            {"id": 104, "name": "TRK-04"},
+            {"id": 105, "name": "TRK-05"},
+        ],
+        "statuses": ["en_route", "at_base", "delayed", "idle", "delivered"],
+    },
+
+    "team": {
+        "founders": ["Devraj Menon K"],
+        "developers": ["Devraj Menon K"],
     },
 }
 

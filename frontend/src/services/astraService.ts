@@ -3,10 +3,16 @@
   message: string;
 };
 
-type AstraResponse = {
+type AstraMapAction = {
+  type: "focus_vehicle";
+  vehicle_id: number;
+};
+
+export type AstraResponse = {
   message: string;
   tool: string | null;
   data: Record<string, unknown> | null;
+  action?: AstraMapAction;
 };
 
 const API_BASE =
@@ -16,7 +22,7 @@ const API_BASE =
 export async function askAstra(
   message: string,
   _history: AstraHistoryMessage[] = []
-): Promise<string> {
+): Promise<AstraResponse> {
 
   const response = await fetch(
     `${API_BASE}/ai/astra/chat`,
@@ -46,5 +52,6 @@ export async function askAstra(
     );
   }
 
-  return data.message;
+  return data;
 }
+

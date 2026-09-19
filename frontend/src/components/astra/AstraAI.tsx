@@ -270,7 +270,7 @@ export default function AstraAI({
          REAL LOCAL ASTRA API CALL
          --------------------------------------------- */
 
-      const response =
+      const fullResponse =
         await askAstra(
           message,
           history
@@ -304,10 +304,20 @@ export default function AstraAI({
 
           {
             role: "astra",
-            message: response,
+            message: fullResponse.message,
           },
         ]
       );
+
+      /* HANDLE MAP ACTIONS */
+      if (fullResponse.action?.type === "focus_vehicle") {
+        const event = new CustomEvent("astra-focus-vehicle", {
+          detail: {
+            vehicleId: fullResponse.action.vehicle_id,
+          },
+        });
+        window.dispatchEvent(event);
+      }
 
     } catch (error) {
 
@@ -549,7 +559,7 @@ export default function AstraAI({
               Hey Devraj, I&apos;m Astra AI
 
               <span>
-                ?
+                ✦
               </span>
 
             </div>
