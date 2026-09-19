@@ -4,7 +4,7 @@ FastAPI Application
 """
 
 import asyncio
-
+from backend.app.ai.api.astra import router as astra_router
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,8 +16,6 @@ from backend.app.websocket.fleet_tracking import (
     demo_vehicle_broadcaster,
     fleet_tracking_websocket,
 )
-
-
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -59,6 +57,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 app.include_router(fleet_tracking_router)
 app.include_router(auth_router)
+app.include_router(astra_router)
 
 
 @app.websocket("/ws/fleet")
