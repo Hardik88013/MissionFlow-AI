@@ -105,13 +105,13 @@ function isFleetVehicle(value: unknown): value is FleetVehicle {
 
 export function Dashboard() {
   const [vehicles, setVehicles] = useState<FleetVehicle[]>(initialVehicles);
-  const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(
-    initialVehicles[0]?.vehicle_id ?? null,
-  );
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
 
   const handleVehicleSelect = (vehicleId: number) => {
-    setSelectedVehicleId(vehicleId);
+    setSelectedVehicleId((currentId) =>
+      currentId === vehicleId ? null : vehicleId
+    );
   };
 
   useEffect(() => {
