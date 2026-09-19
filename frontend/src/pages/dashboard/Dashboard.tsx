@@ -22,7 +22,8 @@ import {
   Users,
   Wrench,
   Zap,
-  LogOut
+  LogOut,
+  X
 } from "lucide-react";
 
 type VehicleStatus =
@@ -108,9 +109,7 @@ export function Dashboard() {
   const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
   const [socketConnected, setSocketConnected] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(
-    initialVehicles[0],
-  );
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
 
   useEffect(() => {
     let socket: WebSocket | null = null;
@@ -149,12 +148,6 @@ export function Dashboard() {
                   : vehicle,
               );
             });
-
-            setSelectedVehicle((current) =>
-              current?.vehicle_id === incomingVehicle.vehicle_id
-                ? incomingVehicle
-                : current,
-            );
           } catch {
             // Ignore malformed WebSocket messages.
           }
@@ -191,6 +184,19 @@ export function Dashboard() {
     (vehicle) => vehicle.status === "en_route",
   ).length;
 
+  const handleVehicleSelect = (vehicleId: number) => {
+    const vehicleIdStr = String(vehicleId);
+    setSelectedVehicleId((currentId) =>
+      currentId === vehicleIdStr ? null : vehicleIdStr,
+    );
+  };
+
+  const selectedVehicle = useMemo(() => {
+    if (selectedVehicleId === null) {
+      return null;
+    }
+    return vehicles.find((v) => String(v.vehicle_id) === selectedVehicleId) ?? null;
+  }, [vehicles, selectedVehicleId]);
 
   const fleetStatus = socketConnected ? "LIVE" : "CONNECTING";
 
@@ -581,7 +587,7 @@ export function Dashboard() {
 
                 {/* Live vehicle marker */}
                 <button
-                  onClick={() => setSelectedVehicle(vehicles[0])}
+                  onClick={() => handleVehicleSelect(vehicles[0].vehicle_id)}
                   className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110"
                   style={{
                     left: `${selectedVehiclePosition.x}%`,
@@ -596,7 +602,7 @@ export function Dashboard() {
 
                 {/* Selected vehicle card */}
                 {selectedVehicle && (
-                  <div className="absolute right-4 top-4 w-[210px] rounded-xl border border-white/30 bg-white/95 p-4 shadow-2xl backdrop-blur">
+                  <div className="absolute right-4 top-4 w-[210px] rounded-xl border border-white/30 bg-white/95 p-4 shadow-2xl backdrop-blur animate-in fade-in slide-in-from-right-4 duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Truck className="h-4 w-4 text-slate-800" />
@@ -606,11 +612,21 @@ export function Dashboard() {
                         </span>
                       </div>
 
-                      <span className="rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold text-emerald-600">
-                        {selectedVehicle.status === "en_route"
-                          ? "Live"
-                          : selectedVehicle.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelectedVehicleId(null)}
+                          className="text-slate-400 hover:text-slate-600 transition-colors p-0.5"
+                          aria-label="Close vehicle details"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+
+                        <span className="rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold text-emerald-600">
+                          {selectedVehicle.status === "en_route"
+                            ? "Live"
+                            : selectedVehicle.status}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="mt-3 space-y-2 text-[10px] text-slate-500">
@@ -685,8 +701,12 @@ export function Dashboard() {
                 {vehicles.slice(0, 5).map((vehicle) => (
                   <button
                     key={vehicle.vehicle_id}
-                    onClick={() => setSelectedVehicle(vehicle)}
-                    className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-slate-50"
+                    onClick={() => handleVehicleSelect(vehicle.vehicle_id)}
+                    className={`flex w-full items-center gap-3 px-5 py-3.5 text-left transition ${
+                      selectedVehicleId === String(vehicle.vehicle_id)
+                        ? "bg-emerald-50 border-l-2 border-emerald-500"
+                        : "hover:bg-slate-50"
+                    }`}
                   >
                     <span
                       className={`h-2.5 w-2.5 rounded-full ${
@@ -699,7 +719,11 @@ export function Dashboard() {
                     />
 
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold">
+                      <p className={`text-xs font-bold ${
+                        selectedVehicleId === String(vehicle.vehicle_id)
+                          ? "text-emerald-700"
+                          : "text-slate-900"
+                      }`}>
                         TRK-{String(vehicle.vehicle_id).slice(-2)}
                       </p>
 
@@ -724,7 +748,11 @@ export function Dashboard() {
                           : vehicle.status}
                     </span>
 
-                    <ChevronRight className="h-3.5 w-3.5 text-slate-300" />
+                    <ChevronRight className={`h-3.5 w-3.5 ${
+                      selectedVehicleId === String(vehicle.vehicle_id)
+                        ? "text-emerald-500"
+                        : "text-slate-300"
+                    }`} />
                   </button>
                 ))}
               </div>
