@@ -1,5 +1,10 @@
 ﻿import AstraAI from "../../components/astra/AstraAI";
-import { useEffect, useMemo, useState } from "react";
+import LiveMissionMap from "../../components/maps/LiveMissionMap";
+import type {
+  FleetVehicle,
+  FleetWebSocketMessage,
+} from "../../types/fleet";
+import { useEffect, useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -24,36 +29,13 @@ import {
   Zap,
 } from "lucide-react";
 
-type VehicleStatus =
-  | "en_route"
-  | "idle"
-  | "delayed"
-  | "delivered"
-  | "at_base";
-
-type Vehicle = {
-  vehicle_id: number;
-  latitude: number;
-  longitude: number;
-  route_id: number;
-  current_stop: number;
-  status: VehicleStatus;
-  eta_minutes: number;
-  timestamp: string;
-};
-
-type WebSocketMessage = {
-  type: string;
-  vehicle?: Vehicle;
-};
-
 const WS_URL = "ws://127.0.0.1:8000/ws/fleet";
 
-const initialVehicles: Vehicle[] = [
+const initialVehicles: FleetVehicle[] = [
   {
     vehicle_id: 101,
-    latitude: 10.851,
-    longitude: 76.272,
+    latitude: 10.899,
+    longitude: 76.32,
     route_id: 5,
     current_stop: 3,
     status: "en_route",
@@ -62,8 +44,8 @@ const initialVehicles: Vehicle[] = [
   },
   {
     vehicle_id: 102,
-    latitude: 21.1458,
-    longitude: 79.0882,
+    latitude: 34.1526,
+    longitude: 77.5771,
     route_id: 7,
     current_stop: 2,
     status: "en_route",
@@ -72,8 +54,8 @@ const initialVehicles: Vehicle[] = [
   },
   {
     vehicle_id: 103,
-    latitude: 28.6139,
-    longitude: 77.209,
+    latitude: 31.1048,
+    longitude: 77.1734,
     route_id: 8,
     current_stop: 4,
     status: "delayed",
@@ -82,36 +64,60 @@ const initialVehicles: Vehicle[] = [
   },
   {
     vehicle_id: 104,
-    latitude: 13.0827,
-    longitude: 80.2707,
+    latitude: 30.7333,
+    longitude: 76.7794,
     route_id: 11,
     current_stop: 1,
     status: "at_base",
     eta_minutes: 0,
     timestamp: new Date().toISOString(),
   },
+  {
+    vehicle_id: 105,
+    latitude: 28.6139,
+    longitude: 77.209,
+    route_id: 12,
+    current_stop: 2,
+    status: "en_route",
+    eta_minutes: 28,
+    timestamp: new Date().toISOString(),
+  },
 ];
 
-const routePoints = [
-  { x: 20, y: 72, label: "Mumbai" },
-  { x: 38, y: 58, label: "Nagpur" },
-  { x: 49, y: 72, label: "Hyderabad" },
-  { x: 61, y: 50, label: "Visakhapatnam" },
-  { x: 70, y: 34, label: "Delhi" },
-  { x: 52, y: 22, label: "Srinagar" },
-  { x: 76, y: 72, label: "Chennai" },
-];
+function isFleetVehicle(value: unknown): value is FleetVehicle {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const vehicle = value as Partial<FleetVehicle>;
+
+  return (
+    typeof vehicle.vehicle_id === "number" &&
+    Number.isFinite(vehicle.latitude) &&
+    Number.isFinite(vehicle.longitude) &&
+    typeof vehicle.timestamp === "string" &&
+    ["en_route", "idle", "delayed", "delivered", "at_base"].includes(
+      vehicle.status ?? "",
+    )
+  );
+}
+
 
 export function Dashboard() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
-  const [socketConnected, setSocketConnected] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(
-    initialVehicles[0],
+  const [vehicles, setVehicles] = useState<FleetVehicle[]>(initialVehicles);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(
+    initialVehicles[0]?.vehicle_id ?? null,
   );
+  const [socketConnected, setSocketConnected] = useState(false);
+
+  const handleVehicleSelect = (vehicleId: number) => {
+    setSelectedVehicleId(vehicleId);
+  };
 
   useEffect(() => {
     let socket: WebSocket | null = null;
     let reconnectTimer: number | undefined;
+    let disposed = false;
 
     const connect = () => {
       try {
@@ -123,35 +129,46 @@ export function Dashboard() {
 
         socket.onmessage = (event) => {
           try {
-            const message: WebSocketMessage = JSON.parse(event.data);
+            const message: FleetWebSocketMessage = JSON.parse(event.data);
 
-            if (message.type !== "vehicle_update" || !message.vehicle) {
+            if (
+              message.type !== "vehicle_update" ||
+              !isFleetVehicle(message.vehicle)
+            ) {
               return;
             }
 
             const incomingVehicle = message.vehicle;
 
             setVehicles((current) => {
-              const exists = current.some(
+              const existing = current.find(
                 (vehicle) => vehicle.vehicle_id === incomingVehicle.vehicle_id,
               );
 
-              if (!exists) {
+              const incomingTimestamp = Date.parse(incomingVehicle.timestamp);
+              const existingTimestamp = existing
+                ? Date.parse(existing.timestamp)
+                : Number.NaN;
+
+              if (
+                existing &&
+                Number.isFinite(incomingTimestamp) &&
+                Number.isFinite(existingTimestamp) &&
+                incomingTimestamp < existingTimestamp
+              ) {
+                return current;
+              }
+
+              if (!existing) {
                 return [...current, incomingVehicle];
               }
 
               return current.map((vehicle) =>
                 vehicle.vehicle_id === incomingVehicle.vehicle_id
-                  ? incomingVehicle
+                  ? { ...vehicle, ...incomingVehicle }
                   : vehicle,
               );
             });
-
-            setSelectedVehicle((current) =>
-              current?.vehicle_id === incomingVehicle.vehicle_id
-                ? incomingVehicle
-                : current,
-            );
           } catch {
             // Ignore malformed WebSocket messages.
           }
@@ -160,6 +177,10 @@ export function Dashboard() {
         socket.onclose = () => {
           setSocketConnected(false);
 
+          if (disposed) {
+            return;
+          }
+
           reconnectTimer = window.setTimeout(() => {
             connect();
           }, 3000);
@@ -167,6 +188,7 @@ export function Dashboard() {
 
         socket.onerror = () => {
           setSocketConnected(false);
+          socket?.close();
         };
       } catch {
         setSocketConnected(false);
@@ -176,7 +198,9 @@ export function Dashboard() {
     connect();
 
     return () => {
-      if (reconnectTimer) {
+      disposed = true;
+
+      if (reconnectTimer !== undefined) {
         window.clearTimeout(reconnectTimer);
       }
 
@@ -190,15 +214,6 @@ export function Dashboard() {
 
 
   const fleetStatus = socketConnected ? "LIVE" : "CONNECTING";
-
-  const selectedVehiclePosition = useMemo(() => {
-    if (!selectedVehicle) {
-      return routePoints[1];
-    }
-
-    const index = selectedVehicle.vehicle_id % routePoints.length;
-    return routePoints[index];
-  }, [selectedVehicle]);
 
   return (
     <div className="min-h-screen bg-[#f4f8fb] text-slate-900">
@@ -450,199 +465,13 @@ export function Dashboard() {
                 </div>
               </div>
 
-              <div className="relative h-[390px] overflow-hidden bg-[#102f3d]">
-                {/* Stylized India map background */}
-                <div className="absolute inset-0 opacity-40">
-                  <svg
-                    viewBox="0 0 100 100"
-                    className="h-full w-full"
-                    preserveAspectRatio="none"
-                  >
-                    <defs>
-                      <pattern
-                        id="mapGrid"
-                        width="5"
-                        height="5"
-                        patternUnits="userSpaceOnUse"
-                      >
-                        <path
-                          d="M 5 0 L 0 0 0 5"
-                          fill="none"
-                          stroke="#8bb5a6"
-                          strokeWidth=".15"
-                        />
-                      </pattern>
-                    </defs>
-
-                    <rect width="100" height="100" fill="url(#mapGrid)" />
-
-                    <path
-                      d="M19 17 L31 10 L47 13 L56 8 L70 14 L78 25 L83 42 L77 52 L82 65 L72 73 L67 88 L55 77 L45 72 L38 82 L27 71 L20 58 L12 46 L16 31Z"
-                      fill="#284d48"
-                      stroke="#aec7a7"
-                      strokeWidth=".35"
-                    />
-
-                    <path
-                      d="M20 40 C32 35 44 37 56 31 C67 25 73 31 81 28"
-                      fill="none"
-                      stroke="#5e8875"
-                      strokeWidth=".25"
-                    />
-
-                    <path
-                      d="M18 60 C31 53 42 58 53 51 C66 42 73 49 84 43"
-                      fill="none"
-                      stroke="#5e8875"
-                      strokeWidth=".25"
-                    />
-
-                    <path
-                      d="M28 19 C31 35 29 50 35 66 C38 74 45 79 48 91"
-                      fill="none"
-                      stroke="#5e8875"
-                      strokeWidth=".25"
-                    />
-                  </svg>
-                </div>
-
-                {/* Routes */}
-                <svg
-                  viewBox="0 0 100 100"
-                  className="absolute inset-0 h-full w-full"
-                >
-                  <path
-                    d="M20 72 Q29 63 38 58 T49 72 T61 50 T70 34 T52 22"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="1.1"
-                    strokeDasharray="2 1"
-                  />
-
-                  <path
-                    d="M20 72 Q39 80 49 72 T76 72"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth=".8"
-                    strokeDasharray="2 1"
-                  />
-
-                  {routePoints.map((point) => (
-                    <g key={point.label}>
-                      <circle
-                        cx={point.x}
-                        cy={point.y}
-                        r="1.7"
-                        fill="#e5f6ed"
-                        stroke="#22c55e"
-                        strokeWidth=".7"
-                      />
-                    </g>
-                  ))}
-                </svg>
-
-                {/* City labels */}
-                {routePoints.map((point) => (
-                  <div
-                    key={point.label}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold text-white drop-shadow-lg"
-                    style={{
-                      left: `${point.x}%`,
-                      top: `${point.y + 4}%`,
-                    }}
-                  >
-                    {point.label}
-                  </div>
-                ))}
-
-                {/* Live vehicle marker */}
-                <button
-                  onClick={() => setSelectedVehicle(vehicles[0])}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110"
-                  style={{
-                    left: `${selectedVehiclePosition.x}%`,
-                    top: `${selectedVehiclePosition.y}%`,
-                  }}
-                >
-                  <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/40" />
-                  <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border-2 border-white bg-emerald-600 shadow-xl">
-                    <Truck className="h-4 w-4 text-white" />
-                  </span>
-                </button>
-
-                {/* Selected vehicle card */}
-                {selectedVehicle && (
-                  <div className="absolute right-4 top-4 w-[210px] rounded-xl border border-white/30 bg-white/95 p-4 shadow-2xl backdrop-blur">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Truck className="h-4 w-4 text-slate-800" />
-
-                        <span className="text-xs font-extrabold">
-                          TRK-{String(selectedVehicle.vehicle_id).slice(-2)}
-                        </span>
-                      </div>
-
-                      <span className="rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold text-emerald-600">
-                        {selectedVehicle.status === "en_route"
-                          ? "Live"
-                          : selectedVehicle.status}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 space-y-2 text-[10px] text-slate-500">
-                      <p className="flex justify-between">
-                        <span>ETA</span>
-                        <strong className="text-slate-800">
-                          {selectedVehicle.eta_minutes} min
-                        </strong>
-                      </p>
-
-                      <p className="flex justify-between">
-                        <span>Route</span>
-                        <strong className="text-slate-800">
-                          RT-{selectedVehicle.route_id}
-                        </strong>
-                      </p>
-
-                      <p className="flex justify-between">
-                        <span>Current stop</span>
-                        <strong className="text-slate-800">
-                          {selectedVehicle.current_stop}
-                        </strong>
-                      </p>
-
-                      <p className="flex justify-between">
-                        <span>Coordinates</span>
-                        <strong className="text-slate-800">
-                          {selectedVehicle.latitude.toFixed(3)},{" "}
-                          {selectedVehicle.longitude.toFixed(3)}
-                        </strong>
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Legend */}
-                <div className="absolute bottom-4 left-4 rounded-xl bg-slate-950/70 px-4 py-3 text-[9px] text-white backdrop-blur">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                    On Route
-                  </div>
-
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-amber-400" />
-                    Delayed
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-cyan-400" />
-                    At Base
-                  </div>
-                </div>
-
-                <div className="absolute bottom-4 right-4 rounded-lg bg-white/95 px-3 py-2 text-[10px] font-bold text-slate-600 shadow">
-                  Satellite View
-                </div>
+              <div className="relative h-[390px] overflow-hidden">
+                <LiveMissionMap
+                  onVehicleSelect={handleVehicleSelect}
+                  selectedVehicleId={selectedVehicleId}
+                  vehicles={vehicles}
+                  socketConnected={socketConnected}
+                />
               </div>
             </div>
 
@@ -661,8 +490,12 @@ export function Dashboard() {
                 {vehicles.slice(0, 5).map((vehicle) => (
                   <button
                     key={vehicle.vehicle_id}
-                    onClick={() => setSelectedVehicle(vehicle)}
-                    className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-slate-50"
+                    onClick={() => handleVehicleSelect(vehicle.vehicle_id)}
+                    className={`flex w-full items-center gap-3 border-l-2 px-5 py-3.5 text-left transition ${
+                      selectedVehicleId === vehicle.vehicle_id
+                        ? "border-emerald-500 bg-emerald-50/80 shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]"
+                        : "border-transparent hover:bg-slate-50"
+                    }`}
                   >
                     <span
                       className={`h-2.5 w-2.5 rounded-full ${
@@ -1316,4 +1149,3 @@ function LegendRow({
     </div>
   );
 }
-

@@ -456,19 +456,16 @@ export default function AstraAI({
         <div
           className="astra-spark sparkle-one"
         >
-          ?
         </div>
 
         <div
           className="astra-spark sparkle-two"
         >
-          ?
         </div>
 
         <div
           className="astra-spark sparkle-three"
         >
-          ?
         </div>
 
       </div>
@@ -546,10 +543,9 @@ export default function AstraAI({
 
             <div className="astra-greeting">
 
-              Hey Devraj, I&apos;m Astra AI
+              Hey Devraj, I’m Astra AI ✦
 
               <span>
-                ?
               </span>
 
             </div>
@@ -851,9 +847,6 @@ export default function AstraAI({
     </div>
   );
 }
-
-
-
 
 
 
