@@ -12,6 +12,9 @@ from backend.app.api.fleet_tracking import router as fleet_tracking_router
 from backend.app.api.predictions_eta import router as eta_router
 from backend.app.api.routes import router as routes_router
 from backend.app.api.auth import router as auth_router
+from backend.app.api.fleet import router as fleet_router
+from backend.app.api.alerts import router as alerts_router
+from backend.app.api.predictions_maintenance import router as maintenance_router
 from backend.app.websocket.fleet_tracking import (
     demo_vehicle_broadcaster,
     fleet_tracking_websocket,
@@ -58,6 +61,9 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(fleet_tracking_router)
 app.include_router(auth_router)
 app.include_router(astra_router)
+app.include_router(fleet_router)
+app.include_router(alerts_router)
+app.include_router(maintenance_router)
 
 
 @app.websocket("/ws/fleet")

@@ -253,13 +253,13 @@ export function Dashboard() {
             </div>
 
             <div className="ml-6 flex items-center gap-5">
-              <button className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+              <a href="/dashboard/alerts" className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 transition" title="Alerts & Notifications">
                 <Bell className="h-5 w-5" />
 
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
                   2
                 </span>
-              </button>
+              </a>
 
               <div className="relative">
                 <button 
@@ -308,15 +308,15 @@ export function Dashboard() {
           <nav className="px-4 py-6">
             <SidebarItem icon={ChartNoAxesCombined} label="Dashboard" active />
 
-            <SidebarItem icon={Truck} label="Fleet Management" />
-            <SidebarItem icon={MapPin} label="Live Tracking" />
+            <SidebarItem icon={Truck} label="Fleet Management" href="/dashboard/fleet" />
+            <SidebarItem icon={MapPin} label="Live Tracking" href="/dashboard" />
             <SidebarItem
               icon={RouteIcon}
               label="Route Optimization"
               href="/dashboard/routes"
             />
-            <SidebarItem icon={Clock3} label="ETA Prediction" />
-            <SidebarItem icon={Wrench} label="Predictive Maintenance" />
+            <SidebarItem icon={Clock3} label="ETA Prediction" href="/dashboard/routes" />
+            <SidebarItem icon={Wrench} label="Predictive Maintenance" href="/dashboard/vehicles" />
             <SidebarItem icon={Boxes} label="Inventory Management" />
             <SidebarItem icon={ChartNoAxesCombined} label="Demand Forecasting" />
 
@@ -324,6 +324,7 @@ export function Dashboard() {
               icon={Bell}
               label="Alerts & Notifications"
               badge="2"
+              href="/dashboard/alerts"
             />
 
             <SidebarItem icon={ChartNoAxesCombined} label="Analytics & Reporting" />
@@ -416,6 +417,7 @@ export function Dashboard() {
               value="412"
               trend="↑ 12%"
               trendPositive
+              href="/dashboard/fleet"
             />
 
             <KpiCard
@@ -484,9 +486,9 @@ export function Dashboard() {
                   <span className="px-3 py-1.5 text-[10px] text-slate-500">
                     Convoys
                   </span>
-                  <span className="px-3 py-1.5 text-[10px] text-slate-500">
+                  <a href="/dashboard/fleet" className="px-3 py-1.5 text-[10px] text-slate-500 hover:text-slate-900 transition">
                     Vehicles
-                  </span>
+                  </a>
                 </div>
               </div>
 
@@ -506,9 +508,9 @@ export function Dashboard() {
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                 <h2 className="text-base font-extrabold">Active Vehicles</h2>
 
-                <button className="text-[10px] font-bold text-emerald-600">
+                <a href="/dashboard/fleet" className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition">
                   View All →
-                </button>
+                </a>
               </div>
 
               <div className="divide-y divide-slate-100">
@@ -600,9 +602,9 @@ export function Dashboard() {
                     </span>
                   </div>
 
-                  <button className="text-[10px] font-bold text-emerald-600">
+                  <a href="/dashboard/vehicles" className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition">
                     View All →
-                  </button>
+                  </a>
                 </div>
 
                 <div className="space-y-4 p-5">
@@ -639,9 +641,9 @@ export function Dashboard() {
               <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                   <h2 className="text-base font-extrabold">Recent Alerts</h2>
-                  <button className="text-[10px] font-bold text-emerald-600">
+                  <a href="/dashboard/alerts" className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition">
                     View All →
-                  </button>
+                  </a>
                 </div>
 
                 <div className="space-y-3 p-5">
@@ -983,15 +985,17 @@ function KpiCard({
   value,
   trend,
   trendPositive,
+  href,
 }: {
   icon: typeof Activity;
   label: string;
   value: string;
   trend: string;
   trendPositive?: boolean;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  const content = (
+    <>
       <div className="flex items-start justify-between">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
           <Icon className="h-5 w-5 text-blue-600" />
@@ -1011,6 +1015,20 @@ function KpiCard({
       </p>
 
       <p className="mt-1 text-2xl font-extrabold tracking-tight">{value}</p>
+    </>
+  );
+
+  if (href) {
+    return (
+      <a href={href} className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md cursor-pointer">
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      {content}
     </div>
   );
 }

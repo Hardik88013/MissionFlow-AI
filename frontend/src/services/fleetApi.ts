@@ -33,5 +33,12 @@ export const fleetApi = {
     });
     if (!res.ok) throw new Error('Failed to delete vehicle');
     return res.json();
+  },
+  seedFleet: async () => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/fleet/seed`, {
+      method: 'POST'
+    });
+    if (!res.ok) throw new Error('Failed to seed fleet');
+    return res.json();
   }
 };

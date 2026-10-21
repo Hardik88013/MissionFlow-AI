@@ -1,4 +1,6 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { fleetApi } from '../../services/fleetApi';
 import { maintenanceApi } from '../../services/maintenanceApi';
 
@@ -64,6 +66,12 @@ export function VehiclesPage() {
 
   return (
     <div className="p-4 md:p-8 bg-background min-h-screen">
+      <Link
+        to="/dashboard"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-emerald-600 transition-colors mb-4"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to Mission Control
+      </Link>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Vehicle Details & AI Health</h1>
         <select 

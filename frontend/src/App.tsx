@@ -10,6 +10,9 @@ import { ForgotPassword } from "./pages/auth/ForgotPassword";
 import { ResetPassword } from "./pages/auth/ResetPassword";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { Routes as RoutesPage } from "./pages/routes/Routes";
+import { FleetPage } from "./pages/Fleet";
+import { VehiclesPage } from "./pages/Vehicles";
+import { AlertsPage } from "./pages/Alerts";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -54,6 +57,36 @@ function AppContent() {
         element={
           <ProtectedRoute>
             <RoutesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Fleet Management (Protected) */}
+      <Route
+        path="/dashboard/fleet"
+        element={
+          <ProtectedRoute>
+            <FleetPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Vehicle Telemetry & Predictive Maintenance (Protected) */}
+      <Route
+        path="/dashboard/vehicles"
+        element={
+          <ProtectedRoute>
+            <VehiclesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Alerts & Notifications (Protected) */}
+      <Route
+        path="/dashboard/alerts"
+        element={
+          <ProtectedRoute>
+            <AlertsPage />
           </ProtectedRoute>
         }
       />

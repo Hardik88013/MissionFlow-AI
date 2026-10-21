@@ -10,5 +10,12 @@ export const alertApi = {
     });
     if (!res.ok) throw new Error('Failed to resolve alert');
     return res.json();
+  },
+  seedAlerts: async () => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/alerts/seed`, {
+      method: 'POST'
+    });
+    if (!res.ok) throw new Error('Failed to seed alerts');
+    return res.json();
   }
 };
