@@ -363,7 +363,7 @@ export function Dashboard() {
           <div className="mb-6 flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
             <div>
               <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                Welcome back, Devraj
+                Welcome back, {user?.full_name || "Operator"}
               </p>
 
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 xl:text-4xl">

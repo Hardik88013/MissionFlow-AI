@@ -1,4 +1,4 @@
-﻿import {
+import {
   useEffect,
   useRef,
   useState,
@@ -11,6 +11,7 @@ import {
   askAstra,
   type AstraHistoryMessage,
 } from "../../services/astraService";
+import { useAuth } from "../../contexts/AuthContext";
 
 type AstraAIProps = {
   onClose?: () => void;
@@ -30,6 +31,8 @@ type AstraState =
 export default function AstraAI({
   onClose,
 }: AstraAIProps) {
+  const { user } = useAuth();
+  const userName = user?.full_name ? user.full_name.split(' ')[0] : 'Operator';
 
   const [state, setState] =
     useState<AstraState>("open");
@@ -556,7 +559,7 @@ export default function AstraAI({
 
             <div className="astra-greeting">
 
-              Hey Devraj, I&apos;m Astra AI
+              Hey {userName}, I&apos;m Astra AI
 
               <span>
                 ✦

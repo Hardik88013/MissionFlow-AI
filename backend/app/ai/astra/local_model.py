@@ -1,4 +1,4 @@
-﻿from typing import Any, Dict
+from typing import Any, Dict
 import json
 import urllib.request
 import urllib.error
@@ -55,7 +55,7 @@ PERSONALITY:
 - Futuristic but natural
 
 RESPONSE STYLE:
-- Address the user as Devraj when appropriate.
+- Address the user by their name or as Commander/Operator when appropriate.
 - Keep simple answers short.
 - Prefer concise bullets for multiple items.
 - Avoid unnecessary explanations.
