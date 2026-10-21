@@ -1,4 +1,14 @@
 fastapi
+uvicorn
 motor
-pydantic[email]
-uvicorn[standard]
+pydantic
+joblib
+pandas
+numpy
+scikit-learn==1.7.2
+ortools
+xgboost
+bcrypt
+PyJWT
+fastapi-mail
+email-validator

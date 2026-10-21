@@ -1,129 +1,124 @@
-import base64
-import hashlib
-import hmac
-import json
 import os
-import secrets
-import time
-from typing import Annotated, Any
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks
+from datetime import timedelta
+from bson import ObjectId
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
-from pydantic import BaseModel, EmailStr, Field
+from backend.app.db.mongodb import db
+from backend.app.models.user import (
+    UserCreate, UserLogin, UserInDB, Token,
+    ForgotPassword, ResetPassword
+)
+from backend.app.services.auth_service import (
+    get_password_hash, verify_password, create_access_token,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    create_reset_token, verify_reset_token
+)
+from backend.app.services.email_service import send_reset_password_email
 
-from backend.app.db.mongodb import get_db
+router = APIRouter(prefix="/auth", tags=["authentication"])
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://missionflowai.vercel.app")
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
-SESSION_COOKIE = "missionflow_session"
-SESSION_SECRET = os.getenv("SESSION_SECRET")
-if not SESSION_SECRET:
-    raise RuntimeError("SESSION_SECRET must be configured before starting the API")
-
-
-class Credentials(BaseModel):
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
-
-
-class UserResponse(BaseModel):
-    email: EmailStr
-    name: str
-
-
-def _hash_password(password: str, salt: bytes | None = None) -> str:
-    salt = salt or secrets.token_bytes(16)
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 210_000)
-    return f"{base64.urlsafe_b64encode(salt).decode()}${base64.urlsafe_b64encode(digest).decode()}"
-
-
-def _verify_password(password: str, encoded: str) -> bool:
+@router.post("/register", response_model=Token)
+async def register(user: UserCreate):
+    email_str = str(user.email).lower()
+    existing_user = await db.users.find_one({"email": email_str})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+        
+    user_dict = user.dict() if hasattr(user, "dict") else user.model_dump()
+    user_dict["email"] = email_str
+    user_dict["full_name"] = str(user_dict.get("full_name", ""))
+    
+    raw_password = user_dict.pop("password")
+    user_dict["hashed_password"] = get_password_hash(raw_password)
+    user_dict["is_active"] = True
+    user_dict["is_google_user"] = False
+    
+    # Safely insert to db
     try:
-        salt_text, digest_text = encoded.split("$", 1)
-        salt = base64.urlsafe_b64decode(salt_text.encode())
-        expected = base64.urlsafe_b64decode(digest_text.encode())
-    except (ValueError, TypeError):
-        return False
-    actual = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 210_000)
-    return hmac.compare_digest(actual, expected)
-
-
-def _create_session(email: str) -> str:
-    payload = json.dumps(
-        {"email": email, "expires": int(time.time()) + 60 * 60 * 8},
-        separators=(",", ":"),
-    ).encode()
-    encoded = base64.urlsafe_b64encode(payload).decode()
-    signature = hmac.new(SESSION_SECRET.encode(), encoded.encode(), hashlib.sha256).hexdigest()
-    return f"{encoded}.{signature}"
-
-
-def _read_session(token: str | None) -> str | None:
-    if not token or "." not in token:
-        return None
-    encoded, signature = token.rsplit(".", 1)
-    expected = hmac.new(SESSION_SECRET.encode(), encoded.encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(signature, expected):
-        return None
-    try:
-        payload = json.loads(base64.urlsafe_b64decode(encoded.encode()))
-    except (ValueError, TypeError, json.JSONDecodeError):
-        return None
-    if payload.get("expires", 0) < time.time():
-        return None
-    return payload.get("email")
-
-
-async def current_user(
-    session: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
-) -> dict[str, Any]:
-    email = _read_session(session)
-    if not email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    db = await get_db()
-    user = await db.users.find_one({"email": email}, {"_id": 0, "email": 1, "name": 1})
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    return user
-
-
-def _set_session(response: Response, email: str):
-    response.set_cookie(
-        SESSION_COOKIE,
-        _create_session(email),
-        httponly=True,
-        samesite="lax",
-        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
-        max_age=60 * 60 * 8,
+        result = await db.users.insert_one(user_dict)
+    except Exception as e:
+        print("DB Insert Error:", e)
+        raise HTTPException(status_code=500, detail="Database insertion failed")
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": email_str}, expires_delta=access_token_expires
     )
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user": {
+            "email": email_str,
+            "full_name": user_dict["full_name"]
+        }
+    }
 
+@router.post("/login", response_model=Token)
+async def login(user: UserLogin):
+    email_str = str(user.email).lower()
+    db_user = await db.users.find_one({"email": email_str})
+    
+    if not db_user or not db_user.get("hashed_password"):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+    if not verify_password(user.password, db_user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": email_str}, expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user": {
+            "email": email_str,
+            "full_name": str(db_user.get("full_name", ""))
+        }
+    }
 
-@router.post("/login", response_model=UserResponse)
-async def login(credentials: Credentials, response: Response):
-    db = await get_db()
-    user = await db.users.find_one({"email": credentials.email.lower()})
-    if not user or not _verify_password(credentials.password, user.get("password_hash", "")):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
-    _set_session(response, user["email"])
-    return {"email": user["email"], "name": user["name"]}
+@router.post("/forgot-password")
+async def forgot_password(req: ForgotPassword, background_tasks: BackgroundTasks):
+    email_str = str(req.email).lower()
+    db_user = await db.users.find_one({"email": email_str})
+    
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found with this email address")
+        
+    token = create_reset_token(email_str)
+    
+    # Send email synchronously to catch SMTP errors during testing
+    try:
+        success = await send_reset_password_email(email_str, token, FRONTEND_URL)
+        if not success:
+            raise Exception("Failed to send")
+    except Exception as e:
+        # Fallback for Render Free Tier SMTP block
+        reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+        return {
+            "message": "Render blocked SMTP. A direct link is provided for testing.",
+            "reset_link": reset_link
+        }
+    
+    return {"message": "Reset link has been sent to your email successfully"}
 
-
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(credentials: Credentials, response: Response):
-    db = await get_db()
-    email = credentials.email.lower()
-    if await db.users.find_one({"email": email}):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An account already exists")
-    user = {"email": email, "name": email.split("@", 1)[0], "password_hash": _hash_password(credentials.password)}
-    await db.users.insert_one(user)
-    _set_session(response, email)
-    return {"email": email, "name": user["name"]}
-
-
-@router.get("/me", response_model=UserResponse)
-async def me(user: Annotated[dict[str, Any], Depends(current_user)]):
-    return user
-
-
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(response: Response):
-    response.delete_cookie(SESSION_COOKIE)
+@router.post("/reset-password")
+async def reset_password(req: ResetPassword):
+    email = verify_reset_token(req.token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+        
+    hashed_password = get_password_hash(req.new_password)
+    result = await db.users.update_one(
+        {"email": email},
+        {"$set": {"hashed_password": hashed_password}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="Failed to reset password")
+        
+    return {"message": "Password has been reset successfully"}

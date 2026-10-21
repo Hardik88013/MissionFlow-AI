@@ -1,10 +1,10 @@
-﻿import pytest
+import pytest
 from httpx import AsyncClient, ASGITransport
 from fastapi import FastAPI
-from app.api.fleet import router as fleet_router
-from app.api.alerts import router as alerts_router
-from app.api.predictions_maintenance import router as pred_router
-from app.db.mongodb import client, db
+from backend.app.api.fleet import router as fleet_router
+from backend.app.api.alerts import router as alerts_router
+from backend.app.api.predictions_maintenance import router as pred_router
+from backend.app.db.mongodb import client, db
 
 app = FastAPI()
 app.include_router(fleet_router)

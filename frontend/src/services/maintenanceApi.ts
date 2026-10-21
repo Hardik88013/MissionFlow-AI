@@ -1,7 +1,7 @@
-﻿export const maintenanceApi = {
+export const maintenanceApi = {
   predictMaintenance: async (features: Record<string, any>) => {
     try {
-      const res = await fetch('http://localhost:8000/predictions/maintenance', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/predictions/maintenance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

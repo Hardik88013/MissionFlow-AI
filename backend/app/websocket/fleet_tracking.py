@@ -14,7 +14,7 @@ from typing import Dict, List, Optional
 
 import joblib
 import pandas as pd
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 
 
 # ---------------------------------------------------------------------------
@@ -337,6 +337,9 @@ async def fleet_tracking_websocket(
                     "message": message,
                 }
             )
+
+    except WebSocketDisconnect:
+        pass
 
     finally:
 

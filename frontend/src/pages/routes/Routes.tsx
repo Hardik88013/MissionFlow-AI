@@ -110,7 +110,7 @@ export function Routes() {
       // ------------------------------------------------------
 
       const routeResponse = await fetch(
-        "http://127.0.0.1:8000/routes/optimize",
+        `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/routes/optimize`,
         {
           method: "POST",
 
@@ -158,7 +158,7 @@ export function Routes() {
       // ------------------------------------------------------
 
       const etaResponse = await fetch(
-        "http://127.0.0.1:8000/predictions/eta",
+        `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/predictions/eta`,
         {
           method: "POST",
 
