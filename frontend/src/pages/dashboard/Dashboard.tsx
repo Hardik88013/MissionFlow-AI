@@ -111,6 +111,28 @@ export function Dashboard() {
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedDate = currentDateTime.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  const formattedTime = currentDateTime.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
 
   const handleVehicleSelect = (vehicleId: number) => {
     setSelectedVehicleId((currentId) =>
@@ -381,7 +403,12 @@ export function Dashboard() {
             </div>
 
             <div className="flex items-center gap-4 text-xs text-slate-500">
-              <span>Fri, 13 Sep 2026</span>
+              <span className="flex items-center gap-1.5 font-medium text-slate-700 bg-white border border-slate-200/80 px-3 py-1.5 rounded-full shadow-xs">
+                <Clock3 className="h-3.5 w-3.5 text-emerald-600" />
+                <span>{formattedDate}</span>
+                <span className="text-slate-300">•</span>
+                <span className="font-semibold text-slate-900 font-mono text-[11px]">{formattedTime}</span>
+              </span>
 
               <span className="flex items-center gap-2">
                 Bengaluru, IN
