@@ -1,7 +1,8 @@
 fastapi
-uvicorn
+uvicorn[standard]
 motor
-pydantic
+python-dotenv
+pydantic[email]
 joblib
 pandas
 numpy
@@ -11,4 +12,3 @@ xgboost
 bcrypt
 PyJWT
 fastapi-mail
-email-validator
