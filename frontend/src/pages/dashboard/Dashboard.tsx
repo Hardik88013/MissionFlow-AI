@@ -28,7 +28,11 @@ import {
   Users,
   Wrench,
   Zap,
-  LogOut
+  LogOut,
+  Sun,
+  CloudRain,
+  CloudLightning,
+  CloudSnow
 } from "lucide-react";
 
 const WS_URL = `${import.meta.env.VITE_WS_URL || "ws://127.0.0.1:8000"}/ws/fleet`;
@@ -112,6 +116,106 @@ export function Dashboard() {
   const [socketConnected, setSocketConnected] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [weather, setWeather] = useState<{
+    city: string;
+    temp: number;
+    weatherCode: number;
+    loading: boolean;
+  }>({
+    city: "New Delhi, IN",
+    temp: 24,
+    weatherCode: 0,
+    loading: true,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchWeather = async (lat: number, lon: number, cityName?: string) => {
+      try {
+        const weatherRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+        );
+        if (!weatherRes.ok) throw new Error("Weather fetch failed");
+        const weatherData = await weatherRes.json();
+        const current = weatherData.current_weather;
+
+        let detectedCity = cityName;
+        if (!detectedCity) {
+          try {
+            const geoRes = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            );
+            if (geoRes.ok) {
+              const geoData = await geoRes.json();
+              const addr = geoData.address;
+              const place = addr.city || addr.town || addr.district || addr.state || "India";
+              const country = addr.country_code ? addr.country_code.toUpperCase() : "IN";
+              detectedCity = `${place}, ${country}`;
+            }
+          } catch {
+            detectedCity = "Local Node, IN";
+          }
+        }
+
+        if (isMounted && current) {
+          setWeather({
+            city: detectedCity || "India, IN",
+            temp: Math.round(current.temperature),
+            weatherCode: current.weathercode,
+            loading: false,
+          });
+        }
+      } catch {
+        if (isMounted) {
+          setWeather((prev) => ({ ...prev, loading: false }));
+        }
+      }
+    };
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchWeather(position.coords.latitude, position.coords.longitude);
+        },
+        async () => {
+          // IP fallback if geolocation is denied or unavailable
+          try {
+            const ipRes = await fetch("https://ipapi.co/json/");
+            if (ipRes.ok) {
+              const ipData = await ipRes.json();
+              if (ipData.latitude && ipData.longitude) {
+                fetchWeather(
+                  ipData.latitude,
+                  ipData.longitude,
+                  `${ipData.city || "New Delhi"}, ${ipData.country_code || "IN"}`
+                );
+                return;
+              }
+            }
+          } catch {
+            // Default coords: New Delhi
+          }
+          fetchWeather(28.6139, 77.209, "New Delhi, IN");
+        },
+        { timeout: 7000 }
+      );
+    } else {
+      fetchWeather(28.6139, 77.209, "New Delhi, IN");
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const getWeatherIcon = (code: number) => {
+    if (code === 0 || code === 1) return <Sun className="h-4 w-4 text-amber-500" />;
+    if (code >= 51 && code <= 67) return <CloudRain className="h-4 w-4 text-blue-400" />;
+    if (code >= 71 && code <= 77) return <CloudSnow className="h-4 w-4 text-indigo-300" />;
+    if (code >= 95) return <CloudLightning className="h-4 w-4 text-purple-400" />;
+    return <Cloud className="h-4 w-4 text-orange-400" />;
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -410,10 +514,11 @@ export function Dashboard() {
                 <span className="font-semibold text-slate-900 font-mono text-[11px]">{formattedTime}</span>
               </span>
 
-              <span className="flex items-center gap-2">
-                Bengaluru, IN
-                <Cloud className="h-4 w-4 text-orange-400" />
-                28°C
+              <span className="flex items-center gap-1.5 font-medium text-slate-700 bg-white border border-slate-200/80 px-3 py-1.5 rounded-full shadow-xs">
+                {getWeatherIcon(weather.weatherCode)}
+                <span>{weather.city}</span>
+                <span className="text-slate-300">•</span>
+                <span className="font-semibold text-slate-900">{weather.temp}°C</span>
               </span>
 
               <span
