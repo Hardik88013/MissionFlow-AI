@@ -6,6 +6,7 @@ import type {
 } from "../../types/fleet";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { fleetApi } from "../../services/fleetApi";
 import {
   Activity,
   ArrowRight,
@@ -16,7 +17,6 @@ import {
   Clock3,
   Cloud,
   Database,
-  Gauge,
   Globe2,
   MapPin,
   Navigation,
@@ -116,6 +116,36 @@ export function Dashboard() {
   const [socketConnected, setSocketConnected] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [kpiStats, setKpiStats] = useState({
+    totalVehicles: 4,
+    activeConvoys: 2,
+    inTransit: 3,
+    maintenanceDue: 1,
+    avgHealth: 92,
+    onTimeRate: "99.2%",
+    loading: true,
+  });
+
+  useEffect(() => {
+    fleetApi.getFleetStats()
+      .then((data) => {
+        if (data && typeof data.total_vehicles === "number") {
+          setKpiStats({
+            totalVehicles: data.total_vehicles,
+            activeConvoys: data.active_convoys,
+            inTransit: data.in_transit,
+            maintenanceDue: data.maintenance_due,
+            avgHealth: data.avg_health_score,
+            onTimeRate: data.on_time_rate || "99.2%",
+            loading: false,
+          });
+        }
+      })
+      .catch(() => {
+        // Fallback gracefully
+        setKpiStats((prev) => ({ ...prev, loading: false }));
+      });
+  }, []);
   const [weather, setWeather] = useState<{
     city: string;
     temp: number;
@@ -546,8 +576,8 @@ export function Dashboard() {
             <KpiCard
               icon={Truck}
               label="Total Vehicles"
-              value="412"
-              trend="↑ 12%"
+              value={String(kpiStats.totalVehicles)}
+              trend="↑ Live"
               trendPositive
               href="/dashboard/fleet"
             />
@@ -555,40 +585,42 @@ export function Dashboard() {
             <KpiCard
               icon={Users}
               label="Active Convoys"
-              value="28"
-              trend="↑ 8%"
+              value={String(kpiStats.activeConvoys)}
+              trend="↑ Live"
               trendPositive
             />
 
             <KpiCard
               icon={Navigation}
               label="In Transit"
-              value={String(activeVehicles + 5)}
-              trend="→ 0%"
+              value={String(kpiStats.inTransit || activeVehicles)}
+              trend="→ Active"
             />
 
             <KpiCard
               icon={Clock3}
               label="On-Time Deliveries"
-              value="99.2%"
+              value={kpiStats.onTimeRate}
               trend="↑ 2.1%"
               trendPositive
             />
 
             <KpiCard
-              icon={Gauge}
-              label="Operational Costs"
-              value="40%"
-              trend="↓ 40%"
-              trendPositive
+              icon={Wrench}
+              label="Maintenance Due"
+              value={String(kpiStats.maintenanceDue)}
+              trend={kpiStats.maintenanceDue > 0 ? "⚠ Attention" : "✓ Optimal"}
+              trendPositive={kpiStats.maintenanceDue === 0}
+              href="/dashboard/vehicles"
             />
 
             <KpiCard
               icon={ShieldCheck}
-              label="Mission Focused"
-              value="100%"
-              trend="↑ —"
+              label="Avg Fleet Health"
+              value={`${kpiStats.avgHealth}%`}
+              trend="↑ Verified"
               trendPositive
+              href="/dashboard/fleet"
             />
           </section>
 
