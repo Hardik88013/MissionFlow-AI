@@ -4,6 +4,11 @@ export const fleetApi = {
     if (!res.ok) throw new Error('Failed to fetch fleet');
     return res.json();
   },
+  getFleetStats: async () => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/fleet/stats`);
+    if (!res.ok) throw new Error('Failed to fetch fleet stats');
+    return res.json();
+  },
   getVehicle: async (id: string) => {
     const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/fleet/${id}`);
     if (!res.ok) throw new Error('Vehicle not found');
